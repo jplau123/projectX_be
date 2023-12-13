@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\Script 0001 - Create tables.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script 0001 - Create tables.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -24,18 +32,17 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Controllers\" />
-		<Folder Include="Controllers\" />
-		<Folder Include="Interfaces\" />
-		<Folder Include="Attributes\" />
-		<Folder Include="DTOs\" />
-		<Folder Include="Middlewares\Responses\" />
-		<Folder Include="Middlewares\Requests\" />
-		<Folder Include="Model\Entities\" />
-		<Folder Include="Services\" />
-		<Folder Include="Scripts\" />
-		<Folder Include="Repositories\" />
-	</ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Attributes\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Middlewares\Responses\" />
+    <Folder Include="Middlewares\Requests\" />
+    <Folder Include="Model\Entities\" />
+    <Folder Include="Services\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
 
 </Project>
