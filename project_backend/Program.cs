@@ -2,6 +2,9 @@
 
 using DbUp;
 using Npgsql;
+using project_backend.Interfaces;
+using project_backend.Repositories;
+using project_backend.Services;
 using System.Data;
 using System.Reflection;
 
@@ -39,6 +42,8 @@ if (!result.Successful)
 #endif
 }
 
+builder.Services.AddTransient<IItemRepository, ItemRepository>();
+builder.Services.AddTransient<IItemService, ItemService>();
 
 builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 
