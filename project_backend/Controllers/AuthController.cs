@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using project_backend.DTOs;
 
 namespace project_backend.Controllers;
 
@@ -6,5 +8,10 @@ namespace project_backend.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Register(NewUserRequest request)
+    {
+        return Ok();
+    }
 }
