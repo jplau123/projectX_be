@@ -8,7 +8,7 @@
         public int Amount { get; set; }
         public DateTime Created_At { get; set; }
         public string Created_By { get; set; }
-        public DateTime Modified_At { get; set; }
-        public string Modified_By { get; set; }
+        public DateTime ? Modified_At { get; set; }
+        public string ? Modified_By { get; set; }
     }
 }
