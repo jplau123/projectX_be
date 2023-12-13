@@ -1,13 +1,13 @@
-
-
 using DbUp;
 using Npgsql;
+using project_backend.Interfaces;
+using project_backend.Repositories;
+using project_backend.Services;
 using System.Data;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
-
 
 // Add services to the container.
 
@@ -16,9 +16,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddTransient<IAdminService, AdminService>();
+builder.Services.AddTransient<IAdminRepository, AdminRepository>();
+
 EnsureDatabase.For.PostgresqlDatabase(connectionString);
-
-
 
 var upgrader =
     DeployChanges.To
@@ -38,7 +39,6 @@ if (!result.Successful)
     Console.ReadLine();
 #endif
 }
-
 
 builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 

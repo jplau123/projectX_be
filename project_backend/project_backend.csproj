@@ -33,16 +33,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Interfaces\" />
     <Folder Include="Attributes\" />
     <Folder Include="DTOs\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />
-    <Folder Include="Model\Entities\" />
-    <Folder Include="Services\" />
     <Folder Include="Scripts\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
