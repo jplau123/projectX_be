@@ -12,6 +12,18 @@ public class AuthController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Register(NewUserRequest request)
     {
+        if(request.UserName.Length == 0)
+        {
+            return BadRequest();
+        }
+
+        return Ok();
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Login(UserAuthRequest request)
+    {
         return Ok();
     }
 }
