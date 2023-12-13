@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using project_backend.DTOs;
+using project_backend.DTOs.Requests;
+using project_backend.Exceptions;
+using project_backend.Interfaces;
 
 namespace project_backend.Controllers;
 
@@ -8,22 +10,60 @@ namespace project_backend.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    [AllowAnonymous]
-    [HttpPost]
-    public async Task<IActionResult> Register(NewUserRequest request)
-    {
-        if(request.UserName.Length == 0)
-        {
-            return BadRequest();
-        }
+    private readonly IAuthService _authService;
 
-        return Ok();
+    public AuthController(IAuthService authService)
+    {
+        _authService = authService;
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Login(UserAuthRequest request)
+    public async Task<IActionResult> Register(NewUserRequest request)
     {
-        return Ok();
+        try
+        {
+            int userId = await _authService.RegisterAsync(request);
+        }
+        catch (AuthenticationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: 500);
+            //return Problem(detail: "Oops! There was an unexpected error during the user registration. Please try again. ");
+        }
+
+        return Created();
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Authenticate(UserAuthRequest request)
+    {
+        try
+        {
+            string token = await _authService.AuthenticateAsync(request);
+
+            return Ok(token);
+        }
+        catch (AuthenticationException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (AuthNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (AuthInvalidCredentialsException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: 500);
+            //return Problem(detail: "Unexpected error occured during Authentication. Please try again.");
+        }
     }
 }
