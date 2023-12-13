@@ -1,4 +1,6 @@
 using DbUp;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using project_backend.Extensions;
 using project_backend.Interfaces;
@@ -6,14 +8,35 @@ using project_backend.Repositories;
 using project_backend.Services;
 using System.Data;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
 
-// Add services to the container.
+string JWTconfigurationKey = builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key was not found.");
 
+// JWT configuration
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("JWT issuer was not found."),
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new ArgumentNullException("JWT audience was not found."),
+        IssuerSigningKey = new SymmetricSecurityKey 
+        (Encoding.UTF8.GetBytes(JWTconfigurationKey)),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
+});
+
+// Swagger
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -58,6 +81,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -1,4 +1,4 @@
-﻿namespace project_backend.DTOs
+﻿namespace project_backend.DTOs.Requests
 {
     public class NewUserRequest
     {
