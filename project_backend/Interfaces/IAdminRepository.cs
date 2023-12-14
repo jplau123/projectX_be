@@ -4,6 +4,6 @@ namespace project_backend.Interfaces
 {
     public interface IAdminRepository
     {
-        List<User>? GetUsers();
+        Task<List<User>> GetUsersAsync();
     }
 }

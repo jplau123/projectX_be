@@ -6,16 +6,16 @@ namespace project_backend.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class AdminController(IAdminService adminService) : Controller
+    public class AdminController(IAdminService adminService) : ControllerBase
     {
         private readonly IAdminService _adminService = adminService;
 
         [HttpGet]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsersAsync()
         {
             try
             {
-                var usersList = _adminService.GetUsers();
+                var usersList = await _adminService.GetUsersAsync();
 
                 if (usersList == null)
                 {

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE users (
 user_id serial primary key,
-user_name varchar(255),
+user_name varchar(255) ,
 balance int,
 role varchar(255),
 password varchar(255),

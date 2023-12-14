@@ -7,15 +7,9 @@ namespace project_backend.Services
     {
         private readonly IAdminRepository _adminRepository = adminRepository;
 
-        public List<User>? GetUsers()
+        public async Task<List<User>>? GetUsersAsync()
         {
-            var departmentList = _adminRepository.GetUsers();
-
-            if (departmentList.Count == 0)
-            {
-                return null;
-            }
-
+            var departmentList = await _adminRepository.GetUsersAsync();
             return departmentList;
         }
     }

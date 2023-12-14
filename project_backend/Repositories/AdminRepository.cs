@@ -9,10 +9,11 @@ namespace project_backend.Repositories
     {
         private readonly IDbConnection _connectionString = dbConnection;
 
-        public List<User> GetUsers()
+        public async Task<List<User>> GetUsersAsync()
         {
             string query = "SELECT * FROM users;";
-            return _connectionString.Query<User>(query).ToList();
+            var result = await _connectionString.QueryAsync<User>(query);
+            return result.ToList();
         }
     }
 }

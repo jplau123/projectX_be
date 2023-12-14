@@ -12,13 +12,13 @@
 
         public bool Active { get; set; }
 
-        public string Created_At { get; set; }
+        public DateTime Created_At { get; set; }
 
-        public string Created_By { get; set; }
+        public string? Created_By { get; set; }
 
-        public string Modified_At { get; set; }
+        public DateTime? Modified_At { get; set; }
 
-        public string Modified_By { get; set; }
+        public string? Modified_By { get; set; }
     }
 }
 

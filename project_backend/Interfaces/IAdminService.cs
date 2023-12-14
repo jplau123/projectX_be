@@ -4,6 +4,6 @@ namespace project_backend.Interfaces
 {
     public interface IAdminService
     {
-        List<User>? GetUsers();
+        Task<List<User>>? GetUsersAsync();
     }
 }
