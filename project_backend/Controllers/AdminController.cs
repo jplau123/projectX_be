@@ -30,5 +30,18 @@ namespace project_backend.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUserByUserIdAsync(int id)
+        {
+            var deletedUsersCount = await _adminService.DeleteUserByUserIdAsync(id);
+
+            if (deletedUsersCount == 0)
+            {
+                //server error
+            }
+
+            return Ok();
+        }
     }
 }

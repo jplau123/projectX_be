@@ -12,5 +12,18 @@ namespace project_backend.Services
             var departmentList = await _adminRepository.GetUsersAsync();
             return departmentList;
         }
+
+        public async Task<int> DeleteUserByUserIdAsync(int id)
+        {
+            var user = await _adminRepository.GetUserByUserIdAsync(id);
+
+            if (user == null)
+            {
+                return -1;
+            }
+
+            var deletedUserCount = await _adminRepository.DeleteUserByUserIdAsync(id);
+            return deletedUserCount;
+        }
     }
 }
