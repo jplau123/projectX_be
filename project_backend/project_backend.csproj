@@ -37,6 +37,7 @@
   <ItemGroup>
     <Folder Include="Attributes\" />
     <Folder Include="DTOs\" />
+    <Folder Include="Middlewares\Extensions\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />
   </ItemGroup>
