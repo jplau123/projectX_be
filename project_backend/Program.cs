@@ -42,6 +42,9 @@ if (!result.Successful)
 
 builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -20,10 +20,12 @@
 
   <ItemGroup>
     <None Remove="Scripts\Script 0001 - Create tables.sql" />
+    <None Remove="Scripts\Script 0002 - Triggers.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Script 0001 - Create tables.sql" />
+    <EmbeddedResource Include="Scripts\Script 0002 - Triggers.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,9 +47,12 @@
 
   <ItemGroup>
     <Folder Include="Attributes\" />
+    <Folder Include="DTOs\" />
     <Folder Include="DTOs\ResponseDTO\" />
-    <Folder Include="Middlewares\" />
     <Folder Include="Scripts\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Middlewares\Responses\" />
+    <Folder Include="Middlewares\Requests\" />
   </ItemGroup>
 
 </Project>
