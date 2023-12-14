@@ -8,6 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Middlewares\Requests\**" />
+    <Compile Remove="Middlewares\Responses\**" />
+    <Content Remove="Middlewares\Requests\**" />
+    <Content Remove="Middlewares\Responses\**" />
+    <EmbeddedResource Remove="Middlewares\Requests\**" />
+    <EmbeddedResource Remove="Middlewares\Responses\**" />
+    <None Remove="Middlewares\Requests\**" />
+    <None Remove="Middlewares\Responses\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Scripts\Script 0001 - Create tables.sql" />
     <None Remove="Scripts\Script 0002 - Triggers.sql" />
   </ItemGroup>
@@ -37,8 +48,6 @@
   <ItemGroup>
     <Folder Include="Attributes\" />
 	  <Folder Include="DTOs\" />
-    <Folder Include="Middlewares\Responses\" />
-    <Folder Include="Middlewares\Requests\" />
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
     <Folder Include="Scripts\" />

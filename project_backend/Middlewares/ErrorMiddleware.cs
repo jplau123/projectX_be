@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using project_backend.Model;
+using System.Net;
 
 namespace project_backend.Middlewares
 {
@@ -6,6 +7,7 @@ namespace project_backend.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorMiddleware> _logger;
+
         public ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)
         {
             _next = next;
@@ -16,6 +18,7 @@ namespace project_backend.Middlewares
         {
             int statusCode;
             string message;
+            string? trace;
 
             try
             {
@@ -25,20 +28,23 @@ namespace project_backend.Middlewares
             catch (Exception ex)
             {
                 statusCode = (int)HttpStatusCode.InternalServerError;
-                message = $"Unexpected exception was thrown. Please try again.";
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
             }
 
+            _logger.Log(LogLevel.Error, $"----------------------------------------");
             _logger.Log(LogLevel.Error, $"Error: {message}");
+            _logger.Log(LogLevel.Error, $"Trace: {trace}");
 
             httpContext.Response.StatusCode = statusCode;
 
             var response = new ErrorViewModel
             {
-                status = statusCode,
-                message = message
+                Status = statusCode,
+                Error = message
             };
 
-            await httpContext.Response.WriteAsJsonAsync<ErrorViewModel>(response);
+            await httpContext.Response.WriteAsJsonAsync(response);
 
             return;
         }

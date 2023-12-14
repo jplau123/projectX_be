@@ -2,6 +2,7 @@
 
 using DbUp;
 using Npgsql;
+using project_backend.Extensions;
 using project_backend.Interfaces;
 using project_backend.Repositories;
 using project_backend.Services;
@@ -11,7 +12,6 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
 
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -20,8 +20,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 EnsureDatabase.For.PostgresqlDatabase(connectionString);
-
-
 
 var upgrader =
     DeployChanges.To
@@ -62,6 +60,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// My Error handler middleware
+app.UseErrorMiddleware();
 
 app.MapControllers();
 
