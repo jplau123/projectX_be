@@ -6,7 +6,7 @@ namespace project_backend.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class ItemController : Controller
+    public class ItemController : BaseController
     {
         private readonly IItemService _itemService;
         public ItemController(IItemService itemService)
@@ -15,7 +15,7 @@ namespace project_backend.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetItems()
+        public IActionResult GetItems()
         {
             try
             {
