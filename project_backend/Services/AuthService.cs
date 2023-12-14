@@ -22,7 +22,7 @@ namespace project_backend.Services
             _configuration = configuration;
         }
 
-        public async Task<string> AuthenticateAsync(UserAuthRequest authRequest)
+        public async Task<UserAuth> AuthenticateAsync(UserAuthRequest authRequest)
         {
             if (string.IsNullOrEmpty(authRequest.Password)) 
                 throw new AuthInvalidCredentialsException("Password is empty.");
@@ -41,7 +41,7 @@ namespace project_backend.Services
             if (!passwordHash.BcryptVerify(userAuthInfo.Password))
                 throw new AuthenticationException("Incorect username or password.");
 
-            return GenerateToken(userAuthInfo);
+            return userAuthInfo;
         }
 
         public string GenerateToken(UserAuth userAuth)

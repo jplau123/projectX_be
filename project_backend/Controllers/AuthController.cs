@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using project_backend.DTOs.Requests;
 using project_backend.Exceptions;
 using project_backend.Interfaces;
+using project_backend.Model.Entities;
 
 namespace project_backend.Controllers;
 
@@ -44,7 +45,9 @@ public class AuthController : ControllerBase
     {
         try
         {
-            string token = await _authService.AuthenticateAsync(request);
+            UserAuth user = await _authService.AuthenticateAsync(request);
+
+            string token = _authService.GenerateToken(user);
 
             return Ok(token);
         }
