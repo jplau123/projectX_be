@@ -1,5 +1,6 @@
 using DbUp;
 using Npgsql;
+using project_backend.Extensions;
 using project_backend.Interfaces;
 using project_backend.Repositories;
 using project_backend.Services;
@@ -59,6 +60,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// My Error handler middleware
+app.UseErrorMiddleware();
 
 app.MapControllers();
 
