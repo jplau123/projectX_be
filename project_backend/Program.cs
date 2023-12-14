@@ -1,5 +1,3 @@
-
-
 using DbUp;
 using Npgsql;
 using project_backend.Extensions;
@@ -18,6 +16,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IAdminService, AdminService>();
+builder.Services.AddTransient<IAdminRepository, AdminRepository>();
 
 EnsureDatabase.For.PostgresqlDatabase(connectionString);
 
@@ -42,7 +43,6 @@ if (!result.Successful)
 
 builder.Services.AddTransient<IItemRepository, ItemRepository>();
 builder.Services.AddTransient<IItemService, ItemService>();
-
 builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 
 builder.Services.AddTransient<IUserService, UserService>();

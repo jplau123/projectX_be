@@ -51,7 +51,12 @@
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
     <Folder Include="Scripts\" />
-    <Folder Include="Repositories\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="DTOs\ResponseDTO\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Middlewares\Responses\" />
+    <Folder Include="Middlewares\Requests\" />
   </ItemGroup>
 
 </Project>
