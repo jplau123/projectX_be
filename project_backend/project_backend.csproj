@@ -47,6 +47,8 @@
 
   <ItemGroup>
     <Folder Include="Attributes\" />
+    <Folder Include="Middlewares\" />
+    <Folder Include="Scripts\" />
     <Folder Include="DTOs\" />
     <Folder Include="DTOs\ResponseDTO\" />
     <Folder Include="Scripts\" />

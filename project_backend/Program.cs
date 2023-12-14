@@ -40,6 +40,8 @@ if (!result.Successful)
 #endif
 }
 
+builder.Services.AddTransient<IItemRepository, ItemRepository>();
+builder.Services.AddTransient<IItemService, ItemService>();
 builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 
 builder.Services.AddTransient<IUserService, UserService>();
