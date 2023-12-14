@@ -17,13 +17,17 @@ namespace project_backend.Services
         {
             var user = await _adminRepository.GetUserByUserIdAsync(id);
 
+            if (user.Is_Deleted)
+            {
+                return -2;
+            }
+
             if (user == null)
             {
                 return -1;
             }
 
-            var deletedUserCount = await _adminRepository.DeleteUserByUserIdAsync(id);
-            return deletedUserCount;
+            return await _adminRepository.DeleteUserByUserIdAsync(id);
         }
     }
 }

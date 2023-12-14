@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using project_backend.Exceptions;
 using project_backend.Interfaces;
-using Serilog;
 
 namespace project_backend.Controllers
 {
@@ -13,32 +13,29 @@ namespace project_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
-            try
-            {
-                var usersList = await _adminService.GetUsersAsync();
+            var usersList = await _adminService.GetUsersAsync();
 
-                if (usersList == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(usersList);
-            }
-            catch (Exception ex)
+            if (usersList == null)
             {
-                Log.Error(ex, "An error occured: {ErrorMessage}", ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                throw new NotFoundException("No users found.");
             }
+
+            return Ok(usersList);
         }
 
-        [HttpDelete]
+        [HttpPut("{id}")]
         public async Task<IActionResult> DeleteUserByUserIdAsync(int id)
         {
             var deletedUsersCount = await _adminService.DeleteUserByUserIdAsync(id);
 
+            if (deletedUsersCount == -1 || deletedUsersCount == -2)
+            {
+                throw new NotFoundException("Could not find user with provided id.");
+            }
+
             if (deletedUsersCount == 0)
             {
-                //server error
+                throw new Exception("Internal error, user was found, but not deleted.");
             }
 
             return Ok();

@@ -1,4 +1,5 @@
-﻿using project_backend.Model;
+﻿using project_backend.Exceptions;
+using project_backend.Model;
 using System.Net;
 
 namespace project_backend.Middlewares
@@ -25,12 +26,19 @@ namespace project_backend.Middlewares
                 await _next(httpContext);
                 return;
             }
+            catch (NotFoundException ex)
+            {
+                statusCode = (int)HttpStatusCode.NotFound;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
             catch (Exception ex)
             {
                 statusCode = (int)HttpStatusCode.InternalServerError;
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
             }
+
 
             _logger.Log(LogLevel.Error, $"----------------------------------------");
             _logger.Log(LogLevel.Error, $"Error: {message}");
