@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using project_backend.Interfaces;
-using Serilog;
+using project_backend.Model.Entities;
 
 namespace project_backend.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class ItemController : BaseController
+    public class ItemController : ControllerBase
     {
         private readonly IItemService _itemService;
         public ItemController(IItemService itemService)
@@ -17,22 +17,14 @@ namespace project_backend.Controllers
         [HttpGet]
         public IActionResult GetItems()
         {
-            try
-            {
-                var itemsList = _itemService.GetItems();
+            List<Item> itemsList = _itemService.GetItems();
 
-                if (itemsList == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(itemsList);
-            }
-            catch (Exception ex)
+            if (itemsList == null)
             {
-                Log.Error(ex, "An error occured: {ErrorMessage}", ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return NotFound();
             }
+
+            return Ok(itemsList);
         }
     }
 }
