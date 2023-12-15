@@ -61,5 +61,22 @@ namespace project_backend.Repositories
             };
             _connection.Execute(sql, queryArguments);
         }
+        public int AddNewItem(int id, string name, decimal price, int amount)
+        {
+            string sql = $"INSERT INTO items (item_id, item_name, price, amount) VALUES (@id, @name, @price, @amount)";
+            var queryArguments = new
+            {
+                item_name = name,
+                item_id = id,
+                price = price,
+                amount = amount
+            };
+            return _connection.Execute(sql, queryArguments);
+        }
+        public int UpdateItem(int id, string name, decimal price, int amount)
+        {
+            string sql = $"UPDATE items SET item_id = @id WHERE  ";
+            return 0;
+        }
     }
 }

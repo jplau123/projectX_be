@@ -32,11 +32,12 @@ namespace project_backend.Middlewares
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
             }
-           catch (ExceededPriceException ex)
+            catch (ExceededPriceException ex)
             {
                 statusCode = (int)HttpStatusCode.UnprocessableContent;
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
+            }
             catch (NotFoundException ex)
             {
                 statusCode = (int)HttpStatusCode.NotFound;
