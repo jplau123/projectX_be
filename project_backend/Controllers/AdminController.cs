@@ -6,14 +6,14 @@ namespace project_backend.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class AdminController(IAdminService adminService) : ControllerBase
+    public class AdminController(IUserService userService) : ControllerBase
     {
-        private readonly IAdminService _adminService = adminService;
+        private readonly IUserService _userService = userService;
 
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
-            var usersList = await _adminService.GetUsersAsync();
+            var usersList = await _userService.GetUsersAsync();
 
             if (usersList == null)
             {
@@ -26,18 +26,7 @@ namespace project_backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> DeleteUserByUserIdAsync(int id)
         {
-            var deletedUsersCount = await _adminService.DeleteUserByUserIdAsync(id);
-
-            if (deletedUsersCount == -1 || deletedUsersCount == -2)
-            {
-                throw new NotFoundException("Could not find user with provided id.");
-            }
-
-            if (deletedUsersCount == 0)
-            {
-                throw new Exception("Internal error, user was found, but not deleted.");
-            }
-
+            await _userService.DeleteUserByUserIdAsync(id);
             return Ok();
         }
     }

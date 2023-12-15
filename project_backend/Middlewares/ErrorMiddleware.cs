@@ -32,13 +32,18 @@ namespace project_backend.Middlewares
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
             }
+            catch (AlreadySoftDeletedException ex)
+            {
+                statusCode = (int)HttpStatusCode.Gone;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
             catch (Exception ex)
             {
                 statusCode = (int)HttpStatusCode.InternalServerError;
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
             }
-
 
             _logger.Log(LogLevel.Error, $"----------------------------------------");
             _logger.Log(LogLevel.Error, $"Error: {message}");
