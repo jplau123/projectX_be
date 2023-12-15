@@ -1,4 +1,5 @@
-﻿using project_backend.Model;
+﻿using project_backend.Exceptions;
+using project_backend.Model;
 using System.Net;
 
 namespace project_backend.Middlewares
@@ -24,6 +25,18 @@ namespace project_backend.Middlewares
             {
                 await _next(httpContext);
                 return;
+            }
+            catch (ExceededAmountException ex)
+            {
+                statusCode = (int)HttpStatusCode.UnprocessableContent;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
+           catch (ExceededPriceException ex)
+            {
+                statusCode = (int)HttpStatusCode.UnprocessableContent;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
             }
             catch (Exception ex)
             {

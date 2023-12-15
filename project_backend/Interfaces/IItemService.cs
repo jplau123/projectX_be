@@ -9,5 +9,6 @@ namespace project_backend.Interfaces
         //public int UpdateItem(int id, string name, decimal price, int amount);
         //public int DeleteItem(int id);
         //public int AddNewItem(int id, string name, decimal price, int amount);
+        
     }
 }

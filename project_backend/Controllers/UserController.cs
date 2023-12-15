@@ -12,9 +12,12 @@ namespace project_backend.Controllers
 
         private readonly IUserService _userService;
         
-        public UserController(IUserService userService)
+        
+        public UserController(IUserService userService, IItemService itemService)
         {
             _userService = userService;
+           
+
         }
 
         [HttpPut]
@@ -23,6 +26,13 @@ namespace project_backend.Controllers
         {
             
             return Ok("The new balance is $" + _userService.AddUserBalance(user_id, balance));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> PurchaseItem(int user_id, string item_name, int quantityToBuy)
+        {
+            _userService.PurchaseItem(user_id, item_name, quantityToBuy);
+            return Ok($"{item_name} purchase successful");
         }
     }
 }

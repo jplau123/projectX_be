@@ -10,5 +10,11 @@ namespace project_backend.Interfaces
         //public int DeleteItem(int id);
         //public int AddNewItem(int id, string name, decimal price, int amount);
 
+        public int GetItemAmountInStore(string item_name);
+        public int GetTotalItemPrice(string item_name, int quantityToBuy);
+
+        public void DeleteItem(string item_name);
+
+        public void ReduceItemQuantity(string item_name, int reducedQuantity);
     }
 }

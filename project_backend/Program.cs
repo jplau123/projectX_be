@@ -8,7 +8,8 @@ using System.Data;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
+//var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
+var connectionString = builder.Configuration["MySecrets:PostgreConnection"] ?? throw new ArgumentNullException("Connection string was not found."); 
 
 // Add services to the container.
 

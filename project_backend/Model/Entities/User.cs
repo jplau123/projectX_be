@@ -19,5 +19,7 @@
         public DateTime? Modified_At { get; set; }
 
         public string? Modified_By { get; set; }
+
+        public bool Is_Deleted { get; set; }
     }
 }
