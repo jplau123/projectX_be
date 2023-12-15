@@ -19,13 +19,17 @@ namespace project_backend.Services
             }
             return itemsList;
         }
-        public int AddNewItem(int id, string name, decimal price, int amount)
+        public async Task<bool> AddNewItem(int id, string name, decimal price, int quantity, string? created_by)
         {
-            return _itemRepository.AddNewItem(id, name, price, amount);
+            return await _itemRepository.AddNewItem(id, name, price, quantity, created_by) > 0;
         }
-        public int UpdateItem(int id, string name, decimal price, int amount)
+        public async Task<bool> UpdateItem(int id, string name, decimal price, int quantity)
         {
-            return _itemRepository.UpdateItem(id, name, price, amount);
+            return await _itemRepository.UpdateItem(id, name, price, quantity) > 0;
+        }
+        public bool DeleteItem(int id)
+        {
+            return _itemRepository.DeleteItem(id) > 0;
         }
     }
 }

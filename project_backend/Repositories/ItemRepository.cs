@@ -2,6 +2,7 @@
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 using System.Data;
+using System.Data.SqlTypes;
 
 namespace project_backend.Repositories
 {
@@ -14,7 +15,7 @@ namespace project_backend.Repositories
         }
         public IEnumerable<Item> GetItems()
         {
-            return _connection.Query<Item>("SELECT * FROM items");
+            return _connection.Query<Item>("SELECT * FROM items WHERE is_deleted = false");
         }
 
         public int GetItemQuantityInStore(string itemName)
@@ -61,22 +62,50 @@ namespace project_backend.Repositories
             };
             _connection.Execute(sql, queryArguments);
         }
-        public int AddNewItem(int id, string name, decimal price, int amount)
+        public Task<int> AddNewItem(int id, string name, decimal price, int quantity, string? created_by)
         {
-            string sql = $"INSERT INTO items (item_id, item_name, price, amount) VALUES (@id, @name, @price, @amount)";
+            string sql = $"INSERT INTO items (item_id, item_name, price, quantity, created_by) VALUES (@id, @name, @price, @quantity, @created_by)";
             var queryArguments = new
             {
                 item_name = name,
                 item_id = id,
                 price = price,
-                amount = amount
+                quantity = quantity,
+                created_by = created_by
             };
-            return _connection.Execute(sql, queryArguments);
+            return _connection.ExecuteAsync(sql, queryArguments);
         }
-        public int UpdateItem(int id, string name, decimal price, int amount)
+        public Task<int> UpdateItem(int id, string name, decimal price, int quantity)
         {
-            string sql = $"UPDATE items SET item_id = @id WHERE  ";
-            return 0;
+            string sql = $"UPDATE items SET item_name = @name, price = @price, quantity = @quantity WHERE item_id = @id";
+            var queryArguments = new
+            {
+                item_name = name,
+                item_id = id,
+                price = price,
+                quantity = quantity
+            };
+            return (_connection.ExecuteAsync(sql, queryArguments));
+        }
+        public int DeleteItem(int id) 
+        {
+            string sql = $"DELETE FROM items WHERE item_id = @id";
+            var queryArguments = new
+            {
+                item_id = id
+            };
+            if (_connection.Execute(sql, queryArguments) == 0)
+            {
+                return 0;
+            };
+
+            string sqlSecond = $"UPDATE items SET is_deleted = true WHERE item_id = @id";
+            var queryArgumentsSecond = new
+            {
+                item_id = id
+            };
+            var update = _connection.Execute(sqlSecond, queryArgumentsSecond);
+            return update;
         }
     }
 }
