@@ -16,5 +16,50 @@ namespace project_backend.Repositories
         {
             return _connection.Query<Item>("SELECT * FROM items");
         }
+
+        public int GetItemQuantityInStore(string itemName)
+        {
+            string sql = $"SELECT quantity FROM items WHERE item_name = @Item_Name";
+            var queryArguments = new
+            {
+                Item_Name = itemName
+            };
+            int quantityInStore = _connection.QuerySingleOrDefault<int>(sql, queryArguments, null);
+            return quantityInStore;
+        }
+
+        public decimal GetTotalItemPrice(string itemName, int quantityToBuy)
+        {
+            string sql = $"SELECT price FROM items WHERE item_name = @Item_Name";
+            var queryArguments = new
+            {
+                Item_Name = itemName,
+            };
+            decimal totalPrice = quantityToBuy*(_connection.QuerySingleOrDefault<decimal>(sql, queryArguments, null));
+            return totalPrice;
+        }
+
+       
+
+        public void DeleteItem(string itemName)
+        {
+            string sql = $"UPDATE items SET quantity = 0, is_deleted = 'true' WHERE item_name = @Item_Name";
+            var queryArguments = new
+            {
+                Item_Name = itemName
+            };
+            _connection.Execute(sql, queryArguments);
+        }
+
+        public void UpdateItemQuantity(string itemName, int reducedQuantity)
+        {
+            string sql = $"UPDATE items SET quantity = @ReducedQuantity WHERE item_name = @Item_Name";
+            var queryArguments = new
+            {
+                ReducedQuantity = reducedQuantity,
+                Item_Name = itemName
+            };
+            _connection.Execute(sql, queryArguments);
+        }
     }
 }

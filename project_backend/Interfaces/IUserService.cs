@@ -4,10 +4,10 @@ namespace project_backend.Interfaces
 {
     public interface IUserService
     {
+        public decimal AddUserBalance(int userId, decimal balance);
+        public void PurchaseItem(int userId, string itemName, int quantityToBuy);
         public int AddUserBalance(int user_id, int balance);
-
-        Task<List<User>>? GetUsersAsync();
-
-        Task DeleteUserByUserIdAsync(int id);
+        public Task<List<User>>? GetUsersAsync();
+        public Task DeleteUserByUserIdAsync(int id);
     }
 }

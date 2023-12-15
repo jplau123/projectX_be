@@ -7,13 +7,56 @@ namespace project_backend.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly IItemRepository _itemRepository;
+        
+        public UserService(IUserRepository userRepository, IItemRepository itemRepository)
         {
             _userRepository = userRepository;
+            _itemRepository = itemRepository;
         }
-        public int AddUserBalance(int user_id, int balance)
+        public decimal AddUserBalance(int user_id, decimal balance)
         {
-            return _userRepository.AddUserBalance(user_id, balance);
+            decimal currentBalance = _userRepository.GetUserBalance(user_id);
+            decimal balanceAfterTopUp = currentBalance + balance;
+            return _userRepository.AddUserBalance(user_id, balanceAfterTopUp);
+        }
+
+        public void PurchaseItem(int userId, string itemName, int quantityToBuy)
+        {
+            decimal userBalance = _userRepository.GetUserBalance(userId);
+            int quantityInStore = _itemRepository.GetItemQuantityInStore(itemName);
+            decimal totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
+            
+            decimal unitPrice = totalPrice / quantityToBuy;
+            decimal reducedBalance = userBalance - totalPrice;
+            int reducedQuantity = quantityInStore - quantityToBuy;
+
+            if (quantityInStore < quantityToBuy)
+            {
+                throw new ExceededAmountException($"The requested amount of {itemName}s exceeds the amount in the store. There are only {quantityInStore} {itemName}s left.");
+            }
+
+            if (userBalance < totalPrice)
+            {
+                throw new ExceededPriceException($"The price of requested items (${totalPrice}) exceeds your balance. You only got ${userBalance}.");
+            }
+
+            _userRepository.UpdateUserBalance(userId, reducedBalance);
+
+            _userRepository.AppendPurchaseHistory(userId, itemName, quantityToBuy, unitPrice);
+
+            if (quantityInStore == quantityToBuy)
+            {
+                _itemRepository.DeleteItem(itemName);
+
+                return;
+            }
+
+            _itemRepository.UpdateItemQuantity(itemName, reducedQuantity);
+
+           
+
+            
         }
 
         public async Task<List<User>>? GetUsersAsync()
