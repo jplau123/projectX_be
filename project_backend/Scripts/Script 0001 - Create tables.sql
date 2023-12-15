@@ -8,7 +8,8 @@ active bool default true,
 created_at timestamp default current_timestamp,
 created_by varchar(255),
 modified_at timestamp,
-modified_by varchar(255)
+modified_by varchar(255),
+is_deleted boolean
 
 );
 

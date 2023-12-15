@@ -1,19 +1,8 @@
-﻿using Dapper;
-using project_backend.Interfaces;
-using project_backend.Model.Entities;
-using System.Data;
+﻿using project_backend.Interfaces;
 
 namespace project_backend.Repositories
 {
-    public class AdminRepository(IDbConnection dbConnection) : IAdminRepository
+    public class AdminRepository : IAdminRepository
     {
-        private readonly IDbConnection _connectionString = dbConnection;
-
-        public async Task<List<User>> GetUsersAsync()
-        {
-            string query = "SELECT * FROM users;";
-            var result = await _connectionString.QueryAsync<User>(query);
-            return result.ToList();
-        }
     }
 }
