@@ -1,4 +1,5 @@
-﻿using project_backend.Model.Entities;
+﻿using project_backend.DTOs.RequestDTO;
+using project_backend.Model.Entities;
 
 namespace project_backend.Interfaces
 {
@@ -8,6 +9,12 @@ namespace project_backend.Interfaces
 
         Task<List<User>>? GetUsersAsync();
 
+        Task<User> GetUserByUserIdAsync(int id);
+
         Task DeleteUserByUserIdAsync(int id);
+
+        Task AddUserAsync(AddUserRequest request);
+
+        Task<User> UpdateUserByUserIdAsync(UpdateUserRequest request);
     }
 }

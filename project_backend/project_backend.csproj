@@ -48,11 +48,9 @@
 
   <ItemGroup>
     <Folder Include="Attributes\" />
-	  <Folder Include="DTOs\" />
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
     <Folder Include="Scripts\" />
-    <Folder Include="DTOs\" />
     <Folder Include="DTOs\ResponseDTO\" />
     <Folder Include="Scripts\" />
     <Folder Include="Scripts\" />

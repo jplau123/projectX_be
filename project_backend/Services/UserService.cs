@@ -1,4 +1,5 @@
-﻿using project_backend.Exceptions;
+﻿using project_backend.DTOs.RequestDTO;
+using project_backend.Exceptions;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
@@ -22,6 +23,11 @@ namespace project_backend.Services
             return result.ToList();
         }
 
+        public async Task<User> GetUserByUserIdAsync(int id)
+        {
+            return await _userRepository.GetUserByUserIdAsync(id);
+        }
+
         public async Task DeleteUserByUserIdAsync(int id)
         {
             var user = await _userRepository.GetUserByUserIdAsync(id);
@@ -37,6 +43,30 @@ namespace project_backend.Services
             }
 
             await _userRepository.DeleteUserByUserIdAsync(id);
+        }
+
+        public async Task AddUserAsync(AddUserRequest request)
+        {
+            await _userRepository.AddUserAsync(request);
+        }
+
+        public async Task<User> UpdateUserByUserIdAsync(UpdateUserRequest request)
+        {
+            var user = await _userRepository.GetUserByUserIdAsync(request.User_Id);
+
+            if (user == null)
+            {
+                throw new NotFoundException("Could not find user with provided id.");
+            }
+
+            var updatedUserCount = await _userRepository.UpdateUserByUserIdAsync(request);
+
+            if (updatedUserCount == 0 || user.Is_Deleted)
+            {
+                throw new NotFoundException("Could not find user with provided id.");
+            }
+
+            return user;
         }
     }
 }
