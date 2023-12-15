@@ -12,6 +12,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration["MySecrets:PostgreConnection"] ?? throw new ArgumentNullException("Connection string was not found."); ;
+
 string JWTconfigurationKey = builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key was not found.");
 
 // JWT configuration
@@ -20,6 +22,9 @@ builder.Services.AddAuthentication(opt =>
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddCookie(opt =>
+{
+    opt.Cookie.Name = "X-Token";
 }).AddJwtBearer(opt =>
 {
     opt.TokenValidationParameters = new TokenValidationParameters
@@ -28,10 +33,18 @@ builder.Services.AddAuthentication(opt =>
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new ArgumentNullException("JWT audience was not found."),
         IssuerSigningKey = new SymmetricSecurityKey 
         (Encoding.UTF8.GetBytes(JWTconfigurationKey)),
-        ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
+    };
+    opt.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context => 
+        {
+            context.Token = context.Request.Cookies["X-Token"];
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -70,6 +83,9 @@ builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connecti
 
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 
 var app = builder.Build();
 

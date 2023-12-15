@@ -1,4 +1,5 @@
-﻿using project_backend.Model;
+﻿using project_backend.Exceptions;
+using project_backend.Model;
 using System.Net;
 
 namespace project_backend.Middlewares
@@ -24,6 +25,24 @@ namespace project_backend.Middlewares
             {
                 await _next(httpContext);
                 return;
+            }
+            catch (AuthenticationException ex)
+            {
+                statusCode = (int)HttpStatusCode.Unauthorized;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
+            catch (NotFoundException ex)
+            {
+                statusCode = (int)HttpStatusCode.NotFound;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
+            catch (BadRequestException ex)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
             }
             catch (Exception ex)
             {

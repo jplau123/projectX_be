@@ -6,7 +6,8 @@ namespace project_backend.Interfaces
     public interface IAuthService
     {
         public Task<UserAuth> AuthenticateAsync(UserAuthRequest authRequest);
-        public Task<int> RegisterAsync(NewUserRequest request);
+        public Task<User> RegisterAsync(NewUserRequest request);
         public string GenerateToken(UserAuth userAuth);
+        public void SetTokenCookie(HttpContext context, string token);
     }
 }

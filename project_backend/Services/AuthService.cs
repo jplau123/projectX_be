@@ -1,106 +1,90 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using project_backend.DTOs.Requests;
+﻿using project_backend.DTOs.Requests;
 using project_backend.Exceptions;
 using project_backend.Extensions;
+using project_backend.Helpers;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
-using System.Data.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace project_backend.Services
 {
     public class AuthService : IAuthService
     {
         private readonly IUserAuthRepository _userAuthRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUserAuthRepository userAuthRepository, IConfiguration configuration)
+        public AuthService(IUserAuthRepository userAuthRepository, IConfiguration configuration, IUserRepository userRepository)
         {
             _userAuthRepository = userAuthRepository;
             _configuration = configuration;
+            _userRepository = userRepository;
         }
 
         public async Task<UserAuth> AuthenticateAsync(UserAuthRequest authRequest)
         {
-            if (string.IsNullOrEmpty(authRequest.Password)) 
-                throw new AuthInvalidCredentialsException("Password is empty.");
+            UserAuth userAuthInfo = await _userAuthRepository.GetUserAuthDetails(authRequest.UserName)
+                ?? throw new NotFoundException("User does not exist.");
 
-            if (string.IsNullOrEmpty(authRequest.UserName))
-                throw new AuthInvalidCredentialsException("Username is empty.");
+            // TODO check if user is deleted
 
-            UserAuth userAuthInfo = await _userAuthRepository.GetUserAuthDetails(authRequest.UserName) 
-                ?? throw new AuthNotFoundException("User does not exist.");
+            if (!userAuthInfo.Active)
+                throw new AuthenticationException("User is not allowed.");
 
-            string passwordHash = authRequest.Password.Bcrypt();
-
-            if (string.IsNullOrEmpty(passwordHash))
-                throw new Exception("Unexpected encription error occured. Please try again.");
-
-            if (!passwordHash.BcryptVerify(userAuthInfo.Password))
+            if (!authRequest.Password.BcryptVerify(userAuthInfo.Password))
                 throw new AuthenticationException("Incorect username or password.");
 
             return userAuthInfo;
         }
 
-        public string GenerateToken(UserAuth userAuth)
+        public string GenerateToken(UserAuth user)
         {
             string issuer = _configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("JWT issuer was not found.");
             string audience = _configuration["Jwt:Audience"] ?? throw new ArgumentNullException("JWT audience was not found.");
-            string JWTkey = _configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key was not found.");
+            string JwtKey = _configuration["Jwt:Key"] ?? throw new ArgumentNullException("JWT key was not found.");
+            string JwtExpires = _configuration["Jwt:Expires"] ?? throw new ArgumentNullException("JWT expiration time was not found.");
 
-            var key = Encoding.ASCII.GetBytes(JWTkey);
+            // Add aditional claims
+            ICollection<Claim> aditionalClaims = [
+                new Claim(ClaimTypes.Name, user.User_Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role),
+            ];
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                new Claim("user_id", userAuth.User_Id.ToString()),
-                new Claim(ClaimTypes.Role, userAuth.Role),
-                new Claim(JwtRegisteredClaimNames.Sub, userAuth.User_Name),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            }),
-                Expires = DateTime.UtcNow.AddMinutes(100),
-                Issuer = issuer,
-                Audience = audience,
-                SigningCredentials = new SigningCredentials
-                (new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha512Signature)
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwtToken = JwtHelper.GetJwtToken(user.User_Name, JwtKey, issuer, audience, TimeSpan.FromMinutes(int.Parse(JwtExpires)), aditionalClaims);
 
-            string jwtToken = tokenHandler.WriteToken(token);
-
-            return jwtToken;
+            return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         }
 
-        public async Task<int> RegisterAsync(NewUserRequest request)
+        public async Task<User> RegisterAsync(NewUserRequest request)
         {
-            if (string.IsNullOrEmpty(request.UserName))
-                throw new AuthInvalidCredentialsException("Username is empty.");
-            if (string.IsNullOrEmpty(request.Password))
-                throw new AuthInvalidCredentialsException("Password is empty.");
-            if (string.IsNullOrEmpty(request.PasswordRepeat))
-                throw new AuthInvalidCredentialsException("Password repeat is empty.");
-
-            if (request.Password != request.PasswordRepeat)
-                throw new AuthInvalidCredentialsException("Both times password should be the same. ");
-
             bool userNameExists = await _userAuthRepository.UsernameExists(request.UserName);
 
             if (userNameExists)
-                throw new AuthInvalidCredentialsException("User already exists.");
+                throw new BadRequestException("User already exists.");
 
             string passwordHash = request.Password.Bcrypt();
 
             int? userId = await _userAuthRepository.SaveUser(request.UserName, passwordHash);
 
             if (userId == null || userId == 0)
-                throw new Exception("Oops! There was an unexpected error during the user registration. Please try again. ");
+                throw new Exception("Oops! Unexpected error occured during the user registration. Please try again. ");
 
-            return (int)userId;
+            return await _userRepository.GetUserById((int)userId) ?? throw new Exception("Failed to load the user.");
+        }
+
+        public void SetTokenCookie(string token)
+        {
+            // Set cookie
+            HttpContext.Response.Cookies.Append("X-Token", token,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(10),
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                });
         }
     }
 }
