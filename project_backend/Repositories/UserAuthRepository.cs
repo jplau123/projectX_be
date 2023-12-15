@@ -23,7 +23,7 @@ namespace project_backend.Repositories
 
         public async Task<UserAuth?> GetUserAuthDetails(string userName)
         {
-            string sql = "SELECT user_id, user_name, role, password, active FROM users WHERE user_name = @user_name LIMIT 1";
+            string sql = "SELECT user_id, user_name, role, password, active, token, is_deleted, token_created_at, token_expires FROM users WHERE (user_name = @user_name AND is_deleted = false) LIMIT 1";
             return await _connection.QueryFirstOrDefaultAsync<UserAuth>(sql, new { user_name = userName});
         }
 
@@ -40,6 +40,21 @@ namespace project_backend.Repositories
             };
 
             return await _connection.QuerySingleOrDefaultAsync<int>(sql, parameters);
+        }
+
+        public async Task<int> SaveUserToken(UserAuth user)
+        {
+            string sql = "UPDATE users SET token = @token, token_created_at = @token_created, token_expires = @token_expires WHERE user_id = @user_id";
+
+            var parameters = new
+            {
+                user_id = user.User_Id,
+                token = user.Token,
+                token_created = user.Token_Created_at,
+                token_expires = user.Token_Expires,
+            };
+
+            return await _connection.ExecuteAsync(sql, parameters);
         }
     }
 }

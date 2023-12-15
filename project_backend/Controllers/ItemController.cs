@@ -17,8 +17,8 @@ namespace project_backend.Controllers
             _itemService = itemService;
         }
 
-        [Authorize(Roles = nameof(Roles.User))]
         [HttpGet]
+        [Authorize(Roles = nameof(Roles.User))]
         public IActionResult GetItems()
         {
             List<Item> itemsList = _itemService.GetItems();

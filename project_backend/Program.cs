@@ -31,12 +31,13 @@ builder.Services.AddAuthentication(opt =>
     {
         ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new ArgumentNullException("JWT issuer was not found."),
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new ArgumentNullException("JWT audience was not found."),
-        IssuerSigningKey = new SymmetricSecurityKey 
+        IssuerSigningKey = new SymmetricSecurityKey
         (Encoding.UTF8.GetBytes(JWTconfigurationKey)),
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateLifetime = true,
-        ValidateIssuerSigningKey = true
+        ValidateIssuerSigningKey = true,
+        ClockSkew = new TimeSpan(0, 0, 5)
     };
     opt.Events = new JwtBearerEvents
     {
@@ -86,6 +87,8 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

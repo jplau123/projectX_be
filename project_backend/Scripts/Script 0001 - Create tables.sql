@@ -1,15 +1,18 @@
 ﻿CREATE TABLE users (
 user_id serial primary key,
 user_name varchar(255) unique,
-balance int,
+balance decimal,
 role varchar(255),
 password varchar(255),
 active bool default true,
+is_deleted bool default false,
 created_at timestamp default current_timestamp,
 created_by varchar(255),
 modified_at timestamp,
-modified_by varchar(255)
-
+modified_by varchar(255),
+token varchar(255),
+token_created_at timestamptz,
+token_expires timestamptz
 );
 
 CREATE TABLE items (
@@ -22,7 +25,6 @@ created_by varchar(255),
 modified_at timestamp,
 modified_by varchar(255),
 is_deleted boolean
-
 );
 
 CREATE TABLE purchase_history (
