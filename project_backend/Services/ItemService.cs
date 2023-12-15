@@ -19,9 +19,5 @@ namespace project_backend.Services
             }
             return itemsList;
         }
-
-
-
-       
     }
 }

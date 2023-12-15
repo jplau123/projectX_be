@@ -15,39 +15,45 @@ namespace project_backend.Services
         }
         public int AddUserBalance(int user_id, int balance)
         {
-            return _userRepository.AddUserBalance(user_id, balance);
+            int currentBalance = _userRepository.GetUserBalance(user_id);
+            int balanceAfterTopUp = currentBalance + balance;
+            return _userRepository.AddUserBalance(user_id, balanceAfterTopUp);
         }
 
-        public void PurchaseItem(int user_id, string item_name, int quantityToBuy)
+        public void PurchaseItem(int userId, string itemName, int quantityToBuy)
         {
-            int userBalance = _userRepository.GetUserBalance(user_id);
-            int quantityInStore = _itemRepository.GetItemAmountInStore(item_name);
-            int totalPrice = _itemRepository.GetTotalItemPrice(item_name, quantityToBuy);
+            int userBalance = _userRepository.GetUserBalance(userId);
+            int quantityInStore = _itemRepository.GetItemAmountInStore(itemName);
+            int totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
+            
             int unitPrice = totalPrice / quantityToBuy;
+            int reducedBalance = userBalance - totalPrice;
+            int reducedQuantity = quantityInStore - quantityToBuy;
+
+            if (quantityInStore < quantityToBuy)
+            {
+                throw new ExceededAmountException($"The requested amount of {itemName}s exceeds the amount in the store. There are only {quantityInStore} {itemName}s left.");
+            }
 
             if (userBalance < totalPrice)
             {
                 throw new ExceededPriceException($"The price of requested items (${totalPrice}) exceeds your balance. You only got ${userBalance}.");
             }
 
-            if (quantityInStore < quantityToBuy)
+            _userRepository.UpdateUserBalance(userId, reducedBalance);
+
+            _userRepository.AppendPurchaseHistory(userId, itemName, quantityToBuy, unitPrice);
+
+            if (quantityInStore == quantityToBuy)
             {
-                throw new ExceededAmountException($"The requested amount of {item_name}s exceeds the amount in the store. There are only {quantityInStore} {item_name}s left.");
-            }
-            else if(quantityInStore == quantityToBuy)
-            {
-                _itemRepository.DeleteItem(item_name);
+                _itemRepository.DeleteItem(itemName);
+
+                return;
             }
 
-            int reducedBalance = userBalance - totalPrice;
+            _itemRepository.UpdateItemQuantity(itemName, reducedQuantity);
 
-            _userRepository.ReduceUserBalance(user_id, reducedBalance);
-
-            int reducedQuantity = quantityInStore - quantityToBuy;
-
-            _itemRepository.ReduceItemQuantity(item_name, reducedQuantity);
-
-            _userRepository.AppendPurchaseHistory(user_id, item_name, quantityToBuy, unitPrice);
+           
 
             
         }

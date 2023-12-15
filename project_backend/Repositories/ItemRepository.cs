@@ -17,23 +17,23 @@ namespace project_backend.Repositories
             return _connection.Query<Item>("SELECT * FROM items");
         }
 
-        public int GetItemAmountInStore(string item_name)
+        public int GetItemAmountInStore(string itemName)
         {
             string sql = $"SELECT quantity FROM items WHERE item_name = @Item_Name";
             var queryArguments = new
             {
-                Item_Name = item_name
+                Item_Name = itemName
             };
             int quantityInStore = _connection.QuerySingleOrDefault<int>(sql, queryArguments, null);
             return quantityInStore;
         }
 
-        public int GetTotalItemPrice(string item_name, int quantityToBuy)
+        public int GetTotalItemPrice(string itemName, int quantityToBuy)
         {
             string sql = $"SELECT price FROM items WHERE item_name = @Item_Name";
             var queryArguments = new
             {
-                Item_Name = item_name,
+                Item_Name = itemName,
             };
             int totalPrice = quantityToBuy*(_connection.QuerySingleOrDefault<int>(sql, queryArguments, null));
             return totalPrice;
@@ -41,23 +41,23 @@ namespace project_backend.Repositories
 
        
 
-        public void DeleteItem(string item_name)
+        public void DeleteItem(string itemName)
         {
             string sql = $"UPDATE items SET quantity = 0, is_deleted = 'true' WHERE item_name = @Item_Name";
             var queryArguments = new
             {
-                Item_Name = item_name
+                Item_Name = itemName
             };
             _connection.Execute(sql, queryArguments);
         }
 
-        public void ReduceItemQuantity(string item_name, int reducedQuantity)
+        public void UpdateItemQuantity(string itemName, int reducedQuantity)
         {
             string sql = $"UPDATE items SET quantity = @ReducedQuantity WHERE item_name = @Item_Name";
             var queryArguments = new
             {
                 ReducedQuantity = reducedQuantity,
-                Item_Name = item_name
+                Item_Name = itemName
             };
             _connection.Execute(sql, queryArguments);
         }
