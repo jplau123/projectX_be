@@ -37,6 +37,17 @@ namespace project_backend.Middlewares
                 statusCode = (int)HttpStatusCode.UnprocessableContent;
                 message = $"{ex.Message}";
                 trace = ex.StackTrace;
+            catch (NotFoundException ex)
+            {
+                statusCode = (int)HttpStatusCode.NotFound;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
+            catch (AlreadySoftDeletedException ex)
+            {
+                statusCode = (int)HttpStatusCode.Gone;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
             }
             catch (Exception ex)
             {
