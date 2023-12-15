@@ -8,26 +8,26 @@ namespace project_backend.Services
         private readonly IUserRepository _userRepository;
         private readonly IItemRepository _itemRepository;
         
-        public UserService(IUserRepository userRepository, IItemService itemService, IItemRepository itemRepository)
+        public UserService(IUserRepository userRepository, IItemRepository itemRepository)
         {
             _userRepository = userRepository;
             _itemRepository = itemRepository;
         }
-        public int AddUserBalance(int user_id, int balance)
+        public decimal AddUserBalance(int user_id, decimal balance)
         {
-            int currentBalance = _userRepository.GetUserBalance(user_id);
-            int balanceAfterTopUp = currentBalance + balance;
+            decimal currentBalance = _userRepository.GetUserBalance(user_id);
+            decimal balanceAfterTopUp = currentBalance + balance;
             return _userRepository.AddUserBalance(user_id, balanceAfterTopUp);
         }
 
         public void PurchaseItem(int userId, string itemName, int quantityToBuy)
         {
-            int userBalance = _userRepository.GetUserBalance(userId);
-            int quantityInStore = _itemRepository.GetItemAmountInStore(itemName);
-            int totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
+            decimal userBalance = _userRepository.GetUserBalance(userId);
+            int quantityInStore = _itemRepository.GetItemQuantityInStore(itemName);
+            decimal totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
             
-            int unitPrice = totalPrice / quantityToBuy;
-            int reducedBalance = userBalance - totalPrice;
+            decimal unitPrice = totalPrice / quantityToBuy;
+            decimal reducedBalance = userBalance - totalPrice;
             int reducedQuantity = quantityInStore - quantityToBuy;
 
             if (quantityInStore < quantityToBuy)

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE users (
 user_id serial primary key,
 user_name varchar(255) UNIQUE,
-balance int default 0,
+balance decimal default 0,
 role varchar(255),
 password varchar(255),
 active bool default true,

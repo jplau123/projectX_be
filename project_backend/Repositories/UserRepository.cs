@@ -13,7 +13,7 @@ namespace project_backend.Repositories
             _connection = connection;
         }
 
-        public int AddUserBalance(int userId, int balance)
+        public decimal AddUserBalance(int userId, decimal balance)
         {
 
             string sql = $"UPDATE users SET balance = @Balance WHERE user_id = @User_Id RETURNING balance";
@@ -23,25 +23,25 @@ namespace project_backend.Repositories
                 User_Id = userId
             };
 
-            int increasedBalance = _connection.QuerySingleOrDefault<int>(sql, queryArguments, null);
+            decimal increasedBalance = _connection.QuerySingleOrDefault<decimal>(sql, queryArguments, null);
             return increasedBalance;
 
         }
 
-        public int GetUserBalance(int userId)
+        public decimal GetUserBalance(int userId)
         {
             string sql = $"SELECT balance FROM users WHERE user_id = @User_Id";
             var queryArguments = new
             {
                 User_Id = userId
             };
-            int userBalance = _connection.QuerySingleOrDefault<int>(sql, queryArguments, null);
+            decimal userBalance = _connection.QuerySingleOrDefault<decimal>(sql, queryArguments, null);
             return userBalance;
         }
 
 
 
-        public void UpdateUserBalance(int userId, int reducedBalance)
+        public void UpdateUserBalance(int userId, decimal reducedBalance)
         {
             string sql = "UPDATE users SET balance = @Balance WHERE user_id = @User_Id RETURNING balance";
             var queryArguments = new
@@ -52,7 +52,7 @@ namespace project_backend.Repositories
             _connection.Execute(sql, queryArguments);
         }
 
-        public void AppendPurchaseHistory(int userId, string itemName, int quantityPurchased, int unitPrice)
+        public void AppendPurchaseHistory(int userId, string itemName, int quantityPurchased, decimal unitPrice)
         {
             string sql = "INSERT INTO purchase_history (user_id, unit_price, quantity, item_id) VALUES (@User_Id, @Unit_Price, @Quantity, (SELECT item_id FROM items WHERE item_name = @Item_Name))";
             var queryArguments = new

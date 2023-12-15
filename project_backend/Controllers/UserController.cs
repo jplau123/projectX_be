@@ -18,7 +18,7 @@ namespace project_backend.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> AddUserBalance(int userId, int balance)
+        public async Task<IActionResult> AddUserBalance(int userId, decimal balance)
         {
             
             return Ok("The new balance is $" + _userService.AddUserBalance(userId, balance));

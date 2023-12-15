@@ -17,7 +17,7 @@ namespace project_backend.Repositories
             return _connection.Query<Item>("SELECT * FROM items");
         }
 
-        public int GetItemAmountInStore(string itemName)
+        public int GetItemQuantityInStore(string itemName)
         {
             string sql = $"SELECT quantity FROM items WHERE item_name = @Item_Name";
             var queryArguments = new
@@ -28,14 +28,14 @@ namespace project_backend.Repositories
             return quantityInStore;
         }
 
-        public int GetTotalItemPrice(string itemName, int quantityToBuy)
+        public decimal GetTotalItemPrice(string itemName, int quantityToBuy)
         {
             string sql = $"SELECT price FROM items WHERE item_name = @Item_Name";
             var queryArguments = new
             {
                 Item_Name = itemName,
             };
-            int totalPrice = quantityToBuy*(_connection.QuerySingleOrDefault<int>(sql, queryArguments, null));
+            decimal totalPrice = quantityToBuy*(_connection.QuerySingleOrDefault<decimal>(sql, queryArguments, null));
             return totalPrice;
         }
 
