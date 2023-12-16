@@ -1,5 +1,4 @@
-﻿using project_backend.Model;
-using project_backend.Model.Entities;
+﻿using project_backend.Model.Entities;
 
 namespace project_backend.Interfaces
 {

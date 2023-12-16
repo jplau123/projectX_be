@@ -11,8 +11,8 @@ namespace project_backend.Model.Entities
         public required string Role { get; set; }
         public bool Active { get; set; }
         public string? Token { get; set; }
-        public DateTimeOffset? Token_Created_at { get; set; }
-        public DateTimeOffset? Token_Expires { get; set; }
+        public DateTime? Token_Created_at { get; set; }
+        public DateTime? Token_Expires { get; set; }
         public bool Is_Deleted { get; set; }
     }
 }

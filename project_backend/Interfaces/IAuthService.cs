@@ -1,5 +1,4 @@
-﻿using project_backend.DTOs.Requests;
-using project_backend.Model;
+﻿using project_backend.Model;
 using project_backend.Model.Entities;
 using System.Security.Claims;
 
@@ -7,17 +6,19 @@ namespace project_backend.Interfaces
 {
     public interface IAuthService
     {
-        public Task<UserAuth> AuthenticateAsync(UserAuthRequest authRequest);
-        public Task<User> RegisterAsync(NewUserRequest request);
         public Task<UserAuth> GetUserAuthDetails(string userName);
         public Task<string> SetRefreshToken(UserAuth user);
         public Task<string> SetAccessToken(UserAuth user);
-        public Task<string> RefreshJwtToken();
         public RefreshToken GenerateRefreshToken();
-        public void SetTokenCookie();
+        public void SetAccessTokenCookie();
         public void SetRefreshTokenCookie();
+        public Task RevokeRefreshToken();
+        public void DeleteAccessTokenCookie();
         public void DeleteRefreshTokenCookie();
-        public void DeleteTokenCookie();
+        public string GetAccessTokenFromCookie();
+        public string GetRefreshTokenFromCookie();
+        public bool IsTokenValid(UserAuth user, string refreshToken);
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
+        public Task<UserAuth> GetUserFromToken(string token);
     }
 }

@@ -9,5 +9,6 @@ namespace project_backend.Interfaces
         public Task<int?> SaveUser(string userName, string passwordHash);
         public Task<bool> UsernameExists(string userName);
         public Task<int> SaveUserToken(UserAuth user);
+        public Task<int> ExpireUserToken(UserAuth user);
     }
 }

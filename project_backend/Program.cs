@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using project_backend.Extensions;
+using project_backend.Helpers;
 using project_backend.Interfaces;
 using project_backend.Repositories;
 using project_backend.Services;
@@ -85,9 +86,10 @@ builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connecti
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 
+builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
-
+builder.Services.AddScoped<TokenInfo>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

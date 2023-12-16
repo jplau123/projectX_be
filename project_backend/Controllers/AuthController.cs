@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using project_backend.DTOs.Requests;
+using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
@@ -10,23 +11,22 @@ namespace project_backend.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly ILoginService _loginService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
-        IAuthService authService,
-        IUserService userRepository,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        ILoginService loginService)
     {
-        _authService = authService;
         _logger = logger;
+        _loginService = loginService;
     }
 
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Register(NewUserRequest request)
     {
-        User user = await _authService.RegisterAsync(request);
+        User user = await _loginService.Register(request);
 
         _logger.Log(LogLevel.Information, "User '{username}' successfuly registered.", request.UserName);
 
@@ -39,36 +39,30 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Authenticate(UserAuthRequest request)
+    public async Task<IActionResult> Login(UserAuthRequest request)
     {
-        if (HttpContext.User.Identity != null)
-            if (HttpContext.User.Identity.IsAuthenticated)
-                return BadRequest($"You are already authenticated as '{HttpContext.User.Identity.Name}'.");
+        // Is user already Authenticated?
 
-        UserAuth user = await _authService.AuthenticateAsync(request);
+        //if (HttpContext.User.Identity != null)
+        //    if (HttpContext.User.Identity.IsAuthenticated)
+        //        return BadRequest($"You are already authenticated as '{HttpContext.User.Identity.Name}'.");
+        
+        _logger.Log(LogLevel.Information, "Attempting to authenticate... ");
 
-        await _authService.SetAccessToken(user);
+        TokenResponse token = await _loginService.Authenticate(request);
 
-        await _authService.SetRefreshToken(user);
+        _logger.Log(LogLevel.Information, "User '{username}' succesfully authenticated. ", request.UserName);
 
-        _authService.SetTokenCookie();
-
-        _authService.SetRefreshTokenCookie();
-
-        _logger.Log(LogLevel.Information, "User '{username}' succesfully authenticated. ", user.User_Name);
-
-        return Ok($"Succesfully authenticated as '{user.User_Name}'.");
+        return Ok(token);
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public IActionResult LogOut()
+    public async Task<IActionResult> Logout()
     {
         _logger.Log(LogLevel.Information, "Attempting to log out. ");
 
-        _authService.DeleteTokenCookie();
-
-        _authService.DeleteRefreshTokenCookie();
+        await _loginService.RevokeAccess();
 
         _logger.Log(LogLevel.Information, "Succesfully logged out. ");
 
@@ -77,14 +71,14 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Refresh()
+    public async Task<IActionResult> Refresh([FromBody] TokenRequest? request)
     {
         _logger.Log(LogLevel.Information, "Atempting to refresh the token... ");
 
-        await _authService.RefreshJwtToken();
+        TokenResponse newToken = await _loginService.RefreshAccess();
 
         _logger.Log(LogLevel.Information, "Token succesfuly refreshed. ");
 
-        return Ok();
+        return Ok(newToken);
     }
 }

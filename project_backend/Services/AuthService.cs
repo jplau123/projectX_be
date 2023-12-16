@@ -1,7 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using project_backend.DTOs.Requests;
 using project_backend.Exceptions;
-using project_backend.Extensions;
 using project_backend.Helpers;
 using project_backend.Interfaces;
 using project_backend.Model;
@@ -17,52 +15,26 @@ namespace project_backend.Services
     {
         private readonly IUserAuthRepository _userAuthRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpAccessor;
+        private readonly TokenInfo _tokenInfo;
 
         private string _accessToken = null!;
         private string _refreshToken = null!;
 
-
         public AuthService(
-            IUserAuthRepository userAuthRepository, 
-            IConfiguration configuration, 
-            IUserRepository userRepository, 
-            IHttpContextAccessor httpAccessor)
+            IUserAuthRepository userAuthRepository,
+            IUserRepository userRepository,
+            IHttpContextAccessor httpAccessor,
+            TokenInfo tokenInfo)
         {
             _userAuthRepository = userAuthRepository;
-            _configuration = configuration;
             _userRepository = userRepository;
             _httpAccessor = httpAccessor;
-        }
-
-        public async Task<UserAuth> AuthenticateAsync(UserAuthRequest authRequest)
-        {
-            UserAuth user = await GetUserAuthDetails(authRequest.UserName);
-
-            if (user.Is_Deleted)
-                throw new NotFoundException("User does not exists.");
-
-            if (!user.Active)
-                throw new AuthenticationException("User is disabled.");
-
-            if (!authRequest.Password.BcryptVerify(user.Password))
-                throw new AuthenticationException("Incorect username or password.");
-
-            return user;
+            _tokenInfo = tokenInfo;
         }
 
         public Task<string> SetAccessToken(UserAuth user)
         {
-            string issuer = _configuration["Jwt:Issuer"]
-                ?? throw new Exception("JWT issuer was not found.");
-            string audience = _configuration["Jwt:Audience"]
-                ?? throw new Exception("JWT audience was not found.");
-            string JwtKey = _configuration["Jwt:Key"]
-                ?? throw new Exception("JWT key was not found.");
-            int expires = _configuration.GetValue<int?>("Jwt:TokenExpires")
-                ?? throw new Exception("JWT expiration date was not found.");
-
             // Add aditional claims
             ICollection<Claim> aditionalClaims = [
                 new Claim(ClaimTypes.Name, user.User_Id.ToString()),
@@ -71,10 +43,10 @@ namespace project_backend.Services
 
             var jwtToken = JwtHelper.GetJwtToken(
                 user.User_Name,
-                JwtKey,
-                issuer,
-                audience,
-                TimeSpan.FromMinutes(expires),
+                _tokenInfo.SigningKey,
+                _tokenInfo.Issuer,
+                _tokenInfo.Audience,
+                TimeSpan.FromMinutes(_tokenInfo.AccessTokenExpires),
                 aditionalClaims);
 
             _accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
@@ -82,28 +54,8 @@ namespace project_backend.Services
             return Task.FromResult(_accessToken);
         }
 
-        public async Task<User> RegisterAsync(NewUserRequest request)
-        {
-            bool userNameExists = await _userAuthRepository.UsernameExists(request.UserName);
-
-            if (userNameExists)
-                throw new BadRequestException("User already exists.");
-
-            string passwordHash = request.Password.Bcrypt();
-
-            int? userId = await _userAuthRepository.SaveUser(request.UserName, passwordHash);
-
-            if (userId == null || userId == 0)
-                throw new Exception("Oops! Unexpected error occured during the user registration. Please try again. ");
-
-            return await _userRepository.GetUserById((int)userId) ?? throw new Exception("Failed to load the user.");
-        }
-
         public RefreshToken GenerateRefreshToken()
         {
-            int expires = _configuration.GetValue<int?>("Jwt:RefreshTokenExpires")
-                ?? throw new Exception("Refresh token expiration time could not be found.");
-
             var randomNumber = new byte[64];
 
             using (var generator = RandomNumberGenerator.Create())
@@ -115,41 +67,32 @@ namespace project_backend.Services
             {
                 Token = Convert.ToBase64String(randomNumber),
                 Created = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddMinutes(expires)
+                Expires = DateTime.UtcNow.AddMinutes(_tokenInfo.RefreshTokenExpires)
             };
         }
 
-        public async Task<string> SetRefreshToken(UserAuth userAuth)
+        public async Task<string> SetRefreshToken(UserAuth user)
         {
             var token = GenerateRefreshToken();
 
-            userAuth.Token = token.Token;
-            userAuth.Token_Created_at = token.Created;
-            userAuth.Token_Expires = token.Expires;
+            user.Token = token.Token;
+            user.Token_Created_at = token.Created;
+            user.Token_Expires = token.Expires;
 
-            await _userAuthRepository.SaveUserToken(userAuth);
+            await _userAuthRepository.SaveUserToken(user);
 
-            _refreshToken = token.Token;
-
-            return _refreshToken;
+            return _refreshToken = token.Token;
         }
 
-        public void SetTokenCookie()
+        public void SetAccessTokenCookie()
         {
-            string name = _configuration["Jwt:TokenCookieName"]
-                ?? throw new Exception("JWT token cookie name could not be found.");
-
-            // Set access token cookie expiration time the same as for refresh token
-            int expires = _configuration.GetValue<int?>("Jwt:RefreshTokenExpires")
-                ?? throw new Exception("JWT expiration time could not be found.");
-
             if (_accessToken.IsNullOrEmpty())
-                throw new Exception("Jwt token must be set before setting its cookie.");
+                throw new Exception("Access token must be set before setting the cookie.");
 
-            _httpAccessor.HttpContext?.Response.Cookies.Append(name, _accessToken,
+            _httpAccessor.HttpContext?.Response.Cookies.Append(_tokenInfo.AccessTokenCookieName, _accessToken,
                     new CookieOptions
                     {
-                        Expires = DateTime.UtcNow.AddMinutes(expires),
+                        Expires = DateTime.UtcNow.AddMinutes(_tokenInfo.RefreshTokenExpires),
                         HttpOnly = true,
                         Secure = true,
                         IsEssential = true,
@@ -159,101 +102,101 @@ namespace project_backend.Services
 
         public void SetRefreshTokenCookie()
         {
-            string name = _configuration["Jwt:RefreshTokenCookieName"]
-                ?? throw new Exception("Refresh token cookie name could not be found.");
-            int expires = _configuration.GetValue<int?>("Jwt:RefreshTokenExpires")
-                ?? throw new Exception("Refresh token expiration time was not found.");
-
             if (_refreshToken.IsNullOrEmpty())
                 throw new Exception("Refresh token must be set before setting its cookie.");
 
-            _httpAccessor.HttpContext?.Response.Cookies.Append(name, _refreshToken,
+            _httpAccessor.HttpContext?.Response.Cookies.Append(_tokenInfo.RefreshTokenCookieName, _refreshToken,
                     new CookieOptions
                     {
-                        Expires = DateTime.UtcNow.AddMinutes(expires),
+                        Expires = DateTime.UtcNow.AddMinutes(_tokenInfo.RefreshTokenExpires),
                         HttpOnly = true,
                         Secure = true,
                         SameSite = SameSiteMode.None
                     });
         }
-        public void DeleteTokenCookie()
+        public void DeleteAccessTokenCookie()
         {
-            string name = _configuration["Jwt:TokenCookieName"]
-                ?? throw new Exception("JWT token cookie name could not be found.");
-
-            _httpAccessor.HttpContext?.Response.Cookies.Delete(name);
+            _httpAccessor.HttpContext?.Response.Cookies.Delete(_tokenInfo.AccessTokenCookieName);
         }
-
+        
         public void DeleteRefreshTokenCookie()
         {
-            string name = _configuration["Jwt:RefreshTokenCookieName"]
-                ?? throw new Exception("Refresh token cookie name could not be found.");
-
-            _httpAccessor.HttpContext?.Response.Cookies.Delete(name);
+            _httpAccessor.HttpContext?.Response.Cookies.Delete(_tokenInfo.RefreshTokenCookieName);
         }
 
-        public async Task<string> RefreshJwtToken()
+        public async Task RevokeRefreshToken()
         {
-            string tokenCookieName = _configuration["Jwt:TokenCookieName"]
-                ?? throw new Exception("JWT token cookie name could not be found.");
+            string token = _httpAccessor.HttpContext?.Request.Cookies[_tokenInfo.AccessTokenCookieName]
+                ?? throw new AuthenticationException("Access token could not be found.");
 
-            string refreshTokenCookieName = _configuration["Jwt:RefreshTokenCookieName"]
-                ?? throw new Exception("Refresh token cookie name could not be found.");
+            UserAuth user = await GetUserFromToken(token);
 
-            string token = _httpAccessor.HttpContext?.Request.Cookies[tokenCookieName]
-                ?? throw new AuthenticationException();
+            if(await _userAuthRepository.ExpireUserToken(user) == 0)
+                throw new Exception("Failed to revoke the token.");
+        }
 
-            string refreshToken = _httpAccessor.HttpContext?.Request.Cookies[refreshTokenCookieName]
-                ?? throw new AuthenticationException();
+        public string GetAccessTokenFromCookie()
+        {
+            return _httpAccessor.HttpContext?.Request.Cookies[_tokenInfo.AccessTokenCookieName]
+                ?? throw new AuthenticationException("Access token could not be found.");
+        }
+        
+        public string GetRefreshTokenFromCookie()
+        {
+            return _httpAccessor.HttpContext?.Request.Cookies[_tokenInfo.RefreshTokenCookieName]
+                ?? throw new AuthenticationException("Refresh token could not be found.");
+        }
 
+        public bool IsTokenValid(UserAuth user, string refreshToken)
+        {
+            if (user.Token != refreshToken)
+                return false;
+
+            if (user.Token_Expires < DateTime.UtcNow)
+                return false;
+
+            return true;
+        }
+
+        public async Task<UserAuth> GetUserAuthDetails(string userName)
+        {
+            UserAuth user = await _userAuthRepository.GetUserAuthDetails(userName)
+                ?? throw new Exception($"The user with username '{userName}' does not exist. ");
+            return user;
+        }
+
+        public async Task<UserAuth> GetUserFromToken(string token)
+        {
             var principal = GetPrincipalFromExpiredToken(token);
 
             if (principal?.Identity?.Name == null)
                 throw new AuthenticationException("Operation not allowed. ");
 
-            UserAuth user = await GetUserAuthDetails(principal.Identity.Name);
-
-            if (user.Token != refreshToken)
-                throw new AuthenticationException("Invalid token. ");
-
-            if (user.Token_Expires < DateTime.UtcNow)
-                throw new AuthenticationException("Token expired. ");
-
-            _accessToken = await SetAccessToken(user);
-
-            SetTokenCookie();
-
-            return _accessToken;
-        }
-
-        public async Task<UserAuth> GetUserAuthDetails(string userName)
-        {
-            return await _userAuthRepository.GetUserAuthDetails(userName)
-                ?? throw new Exception($"The user with username '{userName}' does not exist. ");
+            return await GetUserAuthDetails(principal.Identity.Name);
         }
 
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
         {
-            string issuer = _configuration["Jwt:Issuer"]
-                ?? throw new Exception("JWT issuer was not found.");
-            string audience = _configuration["Jwt:Audience"]
-                ?? throw new Exception("JWT audience was not found.");
-            string JwtKey = _configuration["Jwt:Key"]
-                ?? throw new Exception("JWT key was not found.");
-            int expires = _configuration.GetValue<int?>("Jwt:TokenExpires")
-                ?? throw new Exception("JWT expiration date was not found.");
-
             var validator = new TokenValidationParameters
             {
-                ValidIssuer = issuer,
-                ValidAudience = audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
-                ValidateLifetime = false,
+                ValidIssuer = _tokenInfo.Issuer,
+                ValidAudience = _tokenInfo.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenInfo.SigningKey)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
             };
 
-            return new JwtSecurityTokenHandler().ValidateToken(token, validator, out _);
-        }
+            var principal = new JwtSecurityTokenHandler().ValidateToken(token, validator, out SecurityToken securityToken);
 
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+
+            // Chech if encription algorythm used is the one we expected it to be
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
+                throw new AuthenticationException("Invalid token.");
+
+            return principal;
+        }
     }
 }

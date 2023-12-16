@@ -17,7 +17,7 @@ namespace project_backend.Repositories
 
         public async Task<bool> UsernameExists(string userName)
         {
-            string sql = "SELECT COUNT(*) FROM users WHERE user_name = @user_name LIMIT 1";
+            string sql = "SELECT COUNT(*) FROM users WHERE (user_name = @user_name AND is_deleted = false) LIMIT 1";
             return await _connection.QueryFirstAsync<int>(sql, new { user_name = userName }) > 0;
         }
 
@@ -52,6 +52,19 @@ namespace project_backend.Repositories
                 token = user.Token,
                 token_created = user.Token_Created_at,
                 token_expires = user.Token_Expires,
+            };
+
+            return await _connection.ExecuteAsync(sql, parameters);
+        }
+
+        public async Task<int> ExpireUserToken(UserAuth user)
+        {
+            string sql = "UPDATE users SET token_expires = @token_expires WHERE user_id = @user_id";
+
+            var parameters = new
+            {
+                user_id = user.User_Id,
+                token_expires = DateTime.UtcNow.AddMinutes(-1),
             };
 
             return await _connection.ExecuteAsync(sql, parameters);

@@ -49,14 +49,10 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-	  <Folder Include="Interfaces\" />
-    <Folder Include="Attributes\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />
     <Folder Include="Model\Entities\" />
-	  <Folder Include="Services\" />
     <Folder Include="Scripts\" />
-	  <Folder Include="DTOs\ResponseDTO\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 

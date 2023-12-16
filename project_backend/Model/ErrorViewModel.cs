@@ -2,7 +2,7 @@
 {
     public class ErrorViewModel
     {
-        public int Status { get; set; }
-        public string? Error { get; set; } = string.Empty;
+        public required int Status { get; set; }
+        public string? Message { get; set; }
     }
 }

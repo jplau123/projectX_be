@@ -3,7 +3,7 @@
     public class RefreshToken
     {
         public required string Token { get; set; }
-        public required DateTimeOffset Created { get; set; }
-        public required DateTimeOffset Expires { get; set; }
+        public required DateTime Created { get; set; }
+        public required DateTime Expires { get; set; }
     }
 }
