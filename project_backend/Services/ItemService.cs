@@ -1,9 +1,10 @@
-﻿using project_backend.Interfaces;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
 namespace project_backend.Services
 {
-    public class ItemService : IItemService //gali ir daugiau funkciju daryti. uz sesija, uz shopping carta (listas produktu, basket, patikrint ar yra prekes ir kiek ju) cart service (vieta, kuri turi patikrint, is shopping cart i history, sandely sumazint kieki ir pinigus nuskaiciuot is userio gal reik atskiro serviso)
+    public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
         public ItemService(IItemRepository itemRepository)
@@ -19,17 +20,28 @@ namespace project_backend.Services
             }
             return itemsList;
         }
-        public async Task<bool> AddNewItem(int id, string name, decimal price, int quantity, string? created_by)
+        public Task<Item> GetItemById(int id)
         {
-            return await _itemRepository.AddNewItem(id, name, price, quantity, created_by) > 0;
+            return _itemRepository.GetItemById(id);
         }
-        public async Task<bool> UpdateItem(int id, string name, decimal price, int quantity)
+        public async Task<Item> AddNewItem(string name, decimal price, int amount, string? created_by)
         {
-            return await _itemRepository.UpdateItem(id, name, price, quantity) > 0;
+            var id = await _itemRepository.AddNewItem(name, price, amount, created_by);
+            return await _itemRepository.GetItemById(id);
         }
-        public bool DeleteItem(int id)
+        public async Task<Item> UpdateItem(int id, string name, decimal price, int quantity)
         {
-            return _itemRepository.DeleteItem(id) > 0;
+            var result = await _itemRepository.UpdateItem(id, name, price, quantity);
+            if (result)
+            {
+                return await _itemRepository.GetItemById(id);
+            }
+            throw new InvalidOperationException();
         }
+        public Task<bool> DeleteItem(int id)
+        {
+            return _itemRepository.DeleteItem(id);
+        }
+        
     }
 }

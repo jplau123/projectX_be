@@ -28,24 +28,41 @@ namespace project_backend.Controllers
             return Ok(itemsList);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddNewItem([FromBody] AddNewItem newItem)
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<Item>> GetItemById(int id)
         {
-            var result = _itemService.AddNewItem(newItem.Id, newItem.Name, newItem.Price, newItem.Quantity, newItem.Created_By);
-            return Ok(await Task.FromResult(result));
+            var result = await _itemService.GetItemById(id);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddNewItem(AddNewItem newItem)
+        {
+            var result = await _itemService.AddNewItem(newItem.Name, newItem.Price, newItem.Quantity, newItem.Created_By);
+            return CreatedAtAction(nameof(GetItemById), new { id = result.Item_Id }, result);
+
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateItem([FromBody] UpdateItem updateItem)
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateItem(int id, [FromBody] UpdateItem updateItem)
         {
-            var result = _itemService.UpdateItem(updateItem.Id, updateItem.Name, updateItem.Price, updateItem.Quantity);
-            return Ok(await Task.FromResult(result));
+            var result = await _itemService.UpdateItem(id, updateItem.Name, updateItem.Price, updateItem.Quantity);
+            return Ok(result);
         }
 
         [HttpDelete]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteItem(int id)
         {
-            return Ok(_itemService.DeleteItem(id));
+            var result = await _itemService.DeleteItem(id);
+            return Ok(result);
         }
     }
 }

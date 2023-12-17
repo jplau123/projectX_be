@@ -9,10 +9,10 @@ namespace project_backend.Interfaces
         public decimal GetTotalItemPrice(string itemName, int quantityToBuy);
         public void DeleteItem(string itemName);
         public void UpdateItemQuantity(string itemName, int reducedQuantity);
-        //public int GetItemById(int id);
-        public Task<int> UpdateItem(int id, string name, decimal price, int quantity);
-        public int DeleteItem(int id);
-        public Task<int> AddNewItem(int id, string name, decimal price, int quantity, string? created_by);
+        public Task<Item> GetItemById(int id);  
+        public Task<bool> UpdateItem(int id, string name, decimal price, int quantity);
+        public Task<bool> DeleteItem(int id);
+        public Task<int> AddNewItem(string name, decimal price, int amount, string? created_by);
 
     }
 }
