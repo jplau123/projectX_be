@@ -40,13 +40,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Login(UserAuthRequest request)
-    {
-        // Is user already Authenticated?
-
-        //if (HttpContext.User.Identity != null)
-        //    if (HttpContext.User.Identity.IsAuthenticated)
-        //        return BadRequest($"You are already authenticated as '{HttpContext.User.Identity.Name}'.");
-        
+    {        
         _logger.Log(LogLevel.Information, "Attempting to authenticate... ");
 
         TokenResponse token = await _loginService.Authenticate(request);
@@ -75,7 +69,7 @@ public class AuthController : ControllerBase
     {
         _logger.Log(LogLevel.Information, "Atempting to refresh the token... ");
 
-        TokenResponse newToken = await _loginService.RefreshAccess();
+        TokenResponse newToken = await _loginService.RefreshAccess(request);
 
         _logger.Log(LogLevel.Information, "Token succesfuly refreshed. ");
 

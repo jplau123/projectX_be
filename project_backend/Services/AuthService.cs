@@ -118,7 +118,7 @@ namespace project_backend.Services
         {
             _httpAccessor.HttpContext?.Response.Cookies.Delete(_tokenInfo.AccessTokenCookieName);
         }
-        
+
         public void DeleteRefreshTokenCookie()
         {
             _httpAccessor.HttpContext?.Response.Cookies.Delete(_tokenInfo.RefreshTokenCookieName);
@@ -131,7 +131,7 @@ namespace project_backend.Services
 
             UserAuth user = await GetUserFromToken(token);
 
-            if(await _userAuthRepository.ExpireUserToken(user) == 0)
+            if (await _userAuthRepository.ExpireUserToken(user) == 0)
                 throw new Exception("Failed to revoke the token.");
         }
 
@@ -140,7 +140,7 @@ namespace project_backend.Services
             return _httpAccessor.HttpContext?.Request.Cookies[_tokenInfo.AccessTokenCookieName]
                 ?? throw new AuthenticationException("Access token could not be found.");
         }
-        
+
         public string GetRefreshTokenFromCookie()
         {
             return _httpAccessor.HttpContext?.Request.Cookies[_tokenInfo.RefreshTokenCookieName]
@@ -177,26 +177,44 @@ namespace project_backend.Services
 
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
         {
-            var validator = new TokenValidationParameters
+            try
             {
-                ValidIssuer = _tokenInfo.Issuer,
-                ValidAudience = _tokenInfo.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenInfo.SigningKey)),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-            };
+                var validator = new TokenValidationParameters
+                {
+                    ValidIssuer = _tokenInfo.Issuer,
+                    ValidAudience = _tokenInfo.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenInfo.SigningKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
 
-            var principal = new JwtSecurityTokenHandler().ValidateToken(token, validator, out SecurityToken securityToken);
+                var principal = new JwtSecurityTokenHandler().ValidateToken(token, validator, out SecurityToken securityToken);
 
-            var jwtSecurityToken = securityToken as JwtSecurityToken;
+                var jwtSecurityToken = securityToken as JwtSecurityToken;
 
-            // Chech if encription algorythm used is the one we expected it to be
-            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
-                throw new AuthenticationException("Invalid token.");
+                // Chech if encription algorythm used is the one we expected it to be
+                if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
+                    throw new SecurityTokenException("Invalid token.");
 
-            return principal;
+                return principal;
+            }
+            catch (Exception)
+            {
+                throw new SecurityTokenException("Invalid token.");
+            }
         }
+
+        public void SetRefreshToken(string refreshToken)
+        {
+            _refreshToken = refreshToken;
+        }
+        
+        public void SetAccessToken(string accessToken)
+        {
+            _refreshToken = accessToken;
+        }
+
     }
 }

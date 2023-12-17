@@ -1,18 +1,19 @@
-﻿using project_backend.Exceptions;
+﻿using Microsoft.IdentityModel.Tokens;
+using project_backend.Exceptions;
 using project_backend.Model;
 using System;
+using System.Diagnostics;
 using System.Net;
- 
+using System.Reflection;
+
 namespace project_backend.Middlewares
 {
     public class ErrorMiddleware : IMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly ILogger<ErrorMiddleware> _logger;
 
-        public ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)
+        public ErrorMiddleware(ILogger<ErrorMiddleware> logger)
         {
-            _next = next;
             _logger = logger;
         }
 
@@ -20,7 +21,7 @@ namespace project_backend.Middlewares
         {
             try
             {
-                await _next(httpContext);
+                await next(httpContext);
                 return;
             }
             catch (Exception ex)
@@ -33,17 +34,16 @@ namespace project_backend.Middlewares
             }
         }
 
-        private Task<ErrorModel> GetExceptionResponseAsync(Exception exeption)
+        private Task<ErrorModel> GetExceptionResponseAsync(Exception exception)
         {
             int statusCode;
-            string? message = exeption.Message;
-            string? trace = exeption.StackTrace;
-            string? method = "";
-            int lineNumber = 0;
 
-            switch (exeption)
+            switch (exception)
             {
                 case AuthenticationException:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case SecurityTokenException:
                     statusCode = (int)HttpStatusCode.Unauthorized;
                     break;
                 case NotFoundException:
@@ -57,16 +57,21 @@ namespace project_backend.Middlewares
                     break;
             }
 
+            string? message = exception.Message;
+            string? trace = exception.StackTrace;
+
             return Task.FromResult(new ErrorModel()
             {
                 Status = statusCode,
-                Message = message
+                Message = message,
+                Trace = trace
             });
         }
 
         private async Task HandleException(HttpContext httpContext, ErrorModel error)
         {
             _logger.Log(LogLevel.Error, $"----------------------------------------");
+            _logger.Log(LogLevel.Error, "Status Code: {status}", error.Status);
             _logger.Log(LogLevel.Error, "Error: {message}", error.Message);
             _logger.Log(LogLevel.Error, "Trace: {trace}", error.Trace);
 
@@ -79,7 +84,6 @@ namespace project_backend.Middlewares
             };
 
             await httpContext.Response.WriteAsJsonAsync(errorView);
-
         }
     }
 }

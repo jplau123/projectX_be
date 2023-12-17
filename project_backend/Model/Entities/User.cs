@@ -6,7 +6,7 @@
 
         public string User_Name { get; set; }
 
-        public int Balance { get; set; }
+        public decimal Balance { get; set; }
 
         public string Role { get; set; }
 

@@ -5,8 +5,10 @@ using Npgsql;
 using project_backend.Extensions;
 using project_backend.Helpers;
 using project_backend.Interfaces;
+using project_backend.Middlewares;
 using project_backend.Repositories;
 using project_backend.Services;
+using Serilog;
 using System.Data;
 using System.Reflection;
 using System.Text;
@@ -46,6 +48,15 @@ builder.Services.AddAuthentication(opt =>
         {
             context.Token = context.Request.Cookies["X-Token"];
             return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            // Append expired header, so client knows when to use refresh
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Response.Headers.Append("Token-Expired", "true");
+            }
+            return Task.CompletedTask;
         }
     };
 });
@@ -69,6 +80,15 @@ var upgrader =
 
 var result = upgrader.PerformUpgrade();
 
+// Serilog
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
 if (!result.Successful)
 {
     Console.ForegroundColor = ConsoleColor.Red;
@@ -85,6 +105,8 @@ builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connecti
 
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+
+builder.Services.AddTransient<ErrorMiddleware>();
 
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -107,7 +129,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-// My Error handler middleware
+// Global error handler
 app.UseErrorMiddleware();
 
 app.MapControllers();

@@ -34,7 +34,19 @@ namespace project_backend.Services
                 throw new AuthenticationException("Incorect username or password.");
 
             string accessToken = await _authService.SetAccessToken(user);
-            string refreshToken = await _authService.SetRefreshToken(user);
+
+            string refreshToken;
+
+            // Check if user still has valid refresh token, else generate new
+            if (user.Token != null && user.Token_Expires > DateTime.UtcNow)
+            {
+                refreshToken = user.Token;
+                _authService.SetRefreshToken(refreshToken);
+            }
+            else
+            {
+                refreshToken = await _authService.SetRefreshToken(user);
+            }
 
             TokenResponse tokenDTO = new()
             {
@@ -66,10 +78,23 @@ namespace project_backend.Services
                 ?? throw new Exception("Failed to load the user.");
         }
 
-        public async Task<TokenResponse> RefreshAccess()
+        public async Task<TokenResponse> RefreshAccess(TokenRequest? request)
         {
-            string accessToken = _authService.GetAccessTokenFromCookie();
-            string refreshToken = _authService.GetRefreshTokenFromCookie();
+            string accessToken;
+            string refreshToken;
+
+            if (request == null
+                || string.IsNullOrEmpty(request.AccessToken)
+                || string.IsNullOrEmpty(request.RefreshToken))
+            {
+                accessToken = _authService.GetAccessTokenFromCookie();
+                refreshToken = _authService.GetRefreshTokenFromCookie();
+            }
+            else
+            {
+                accessToken = request.AccessToken;
+                refreshToken = request.RefreshToken;
+            }
 
             UserAuth user = await _authService.GetUserFromToken(accessToken);
 

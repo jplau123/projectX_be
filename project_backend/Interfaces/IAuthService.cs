@@ -17,6 +17,8 @@ namespace project_backend.Interfaces
         public void DeleteRefreshTokenCookie();
         public string GetAccessTokenFromCookie();
         public string GetRefreshTokenFromCookie();
+        public void SetRefreshToken(string refreshToken);
+        public void SetAccessToken(string accessToken);
         public bool IsTokenValid(UserAuth user, string refreshToken);
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
         public Task<UserAuth> GetUserFromToken(string token);

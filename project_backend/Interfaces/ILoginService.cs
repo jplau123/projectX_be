@@ -7,7 +7,7 @@ namespace project_backend.Interfaces
     public interface ILoginService
     {
         public Task<TokenResponse> Authenticate(UserAuthRequest authRequest);
-        public Task<TokenResponse> RefreshAccess();
+        public Task<TokenResponse> RefreshAccess(TokenRequest? request);
         public Task<User> Register(NewUserRequest request);
         public Task RevokeAccess();
     }
