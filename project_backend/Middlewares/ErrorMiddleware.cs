@@ -1,10 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using project_backend.Exceptions;
 using project_backend.Model;
-using System;
-using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 
 namespace project_backend.Middlewares
 {
@@ -51,6 +48,15 @@ namespace project_backend.Middlewares
                     break;
                 case BadRequestException:
                     statusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case ExceededAmountException:
+                    statusCode = (int)HttpStatusCode.UnprocessableContent;
+                    break;
+                case ExceededPriceException:
+                    statusCode = (int)HttpStatusCode.UnprocessableContent;
+                    break;
+                case AlreadySoftDeletedException:
+                    statusCode = (int)HttpStatusCode.Gone;
                     break;
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;

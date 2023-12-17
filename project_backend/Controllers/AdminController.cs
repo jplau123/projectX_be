@@ -1,34 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using project_backend.Exceptions;
 using project_backend.Interfaces;
-using Serilog;
 
 namespace project_backend.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class AdminController(IAdminService adminService) : ControllerBase
+    public class AdminController(IUserService userService) : ControllerBase
     {
-        private readonly IAdminService _adminService = adminService;
+        private readonly IUserService _userService = userService;
 
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
-            try
-            {
-                var usersList = await _adminService.GetUsersAsync();
+            var usersList = await _userService.GetUsersAsync();
 
-                if (usersList == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(usersList);
-            }
-            catch (Exception ex)
+            if (usersList == null)
             {
-                Log.Error(ex, "An error occured: {ErrorMessage}", ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                throw new NotFoundException("No users found.");
             }
+
+            return Ok(usersList);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> DeleteUserByUserIdAsync(int id)
+        {
+            await _userService.DeleteUserByUserIdAsync(id);
+            return Ok();
         }
     }
 }
