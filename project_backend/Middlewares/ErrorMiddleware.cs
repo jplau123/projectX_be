@@ -1,10 +1,11 @@
 ﻿using project_backend.Exceptions;
 using project_backend.Model;
+using System;
 using System.Net;
-
+ 
 namespace project_backend.Middlewares
 {
-    public class ErrorMiddleware
+    public class ErrorMiddleware : IMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorMiddleware> _logger;
@@ -15,57 +16,70 @@ namespace project_backend.Middlewares
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
         {
-            int statusCode;
-            string message;
-            string? trace;
-
             try
             {
                 await _next(httpContext);
                 return;
             }
-            catch (AuthenticationException ex)
-            {
-                statusCode = (int)HttpStatusCode.Unauthorized;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
-            catch (NotFoundException ex)
-            {
-                statusCode = (int)HttpStatusCode.NotFound;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
-            catch (BadRequestException ex)
-            {
-                statusCode = (int)HttpStatusCode.BadRequest;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
             catch (Exception ex)
             {
-                statusCode = (int)HttpStatusCode.InternalServerError;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
+                ErrorModel error = await GetExceptionResponseAsync(ex);
+
+                await HandleException(httpContext, error);
+
+                return;
+            }
+        }
+
+        private Task<ErrorModel> GetExceptionResponseAsync(Exception exeption)
+        {
+            int statusCode;
+            string? message = exeption.Message;
+            string? trace = exeption.StackTrace;
+            string? method = "";
+            int lineNumber = 0;
+
+            switch (exeption)
+            {
+                case AuthenticationException:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case NotFoundException:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case BadRequestException:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                default:
+                    statusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
             }
 
-            _logger.Log(LogLevel.Error, $"----------------------------------------");
-            _logger.Log(LogLevel.Error, $"Error: {message}");
-            _logger.Log(LogLevel.Error, $"Trace: {trace}");
-
-            httpContext.Response.StatusCode = statusCode;
-
-            var response = new ErrorViewModel
+            return Task.FromResult(new ErrorModel()
             {
                 Status = statusCode,
-                Error = message
+                Message = message
+            });
+        }
+
+        private async Task HandleException(HttpContext httpContext, ErrorModel error)
+        {
+            _logger.Log(LogLevel.Error, $"----------------------------------------");
+            _logger.Log(LogLevel.Error, "Error: {message}", error.Message);
+            _logger.Log(LogLevel.Error, "Trace: {trace}", error.Trace);
+
+            httpContext.Response.StatusCode = error.Status;
+
+            var errorView = new ErrorViewModel
+            {
+                Status = error.Status,
+                Message = error.Message
             };
 
-            await httpContext.Response.WriteAsJsonAsync(response);
+            await httpContext.Response.WriteAsJsonAsync(errorView);
 
-            return;
         }
     }
 }
