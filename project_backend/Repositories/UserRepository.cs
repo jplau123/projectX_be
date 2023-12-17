@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 using System.Data;
@@ -34,7 +35,7 @@ namespace project_backend.Repositories
             return await _connection.QueryAsync<User>(query);
         }
 
-        public async Task<User> GetUserByUserIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(int id)
         {
             string query = "SELECT user_id, user_name, balance, role, active, created_at, created_by, modified_at, modified_by, is_deleted FROM users WHERE user_id = @id";
             var queryArguments = new
@@ -45,7 +46,13 @@ namespace project_backend.Repositories
             return await _connection.QuerySingleAsync<User>(query, queryArguments);
         }
 
-        public async Task<int> DeleteUserByUserIdAsync(int id)
+        public async Task<IEnumerable<GetPurchaseResponse>> GetAllPurchaseHistoryAsync()
+        {
+            string query = "SELECT ph.purchase_id, ph.user_id, i.item_id, u.user_name, i.item_name, ph.price, ph.created_at FROM purchase_history ph INNER JOIN users u ON ph.user_id = u.user_id INNER JOIN items i ON ph.item_id = i.item_id;";
+            return await _connection.QueryAsync<GetPurchaseResponse>(query);
+        }
+
+        public async Task<int> DeleteUserByIdAsync(int id)
         {
             string query = "UPDATE users SET is_deleted = @isDeleted WHERE user_id = @id";
             var queryArguments = new
@@ -74,7 +81,7 @@ namespace project_backend.Repositories
             await _connection.ExecuteAsync(query, queryArguments);
         }
 
-        public async Task<int> UpdateUserByUserIdAsync(UpdateUserRequest request)
+        public async Task<int> UpdateUserByIdAsync(UpdateUserRequest request)
         {
             string query = "UPDATE users SET user_name = @userName, role = @role, active = @active, modified_by = @modifiedBy WHERE user_id = @id; ";
             var queryArguments = new

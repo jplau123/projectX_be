@@ -1,4 +1,5 @@
 ﻿using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
 using project_backend.Exceptions;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
@@ -17,32 +18,33 @@ namespace project_backend.Services
             return _userRepository.AddUserBalance(user_id, balance);
         }
 
-        public async Task<List<User>>? GetUsersAsync()
+        public async Task<List<User>> GetUsersAsync()
         {
             var result = await _userRepository.GetUsersAsync();
             return result.ToList();
         }
 
-        public async Task<User> GetUserByUserIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _userRepository.GetUserByUserIdAsync(id);
+            return await _userRepository.GetUserByIdAsync(id) ?? throw new NotFoundException("User not found.");
         }
 
-        public async Task DeleteUserByUserIdAsync(int id)
+        public async Task<List<GetPurchaseResponse>> GetAllPurchaseHistoryAsync()
         {
-            var user = await _userRepository.GetUserByUserIdAsync(id);
+            var purchaseHistory = await _userRepository.GetAllPurchaseHistoryAsync();
+            return purchaseHistory.ToList();
+        }
 
-            if (user == null)
-            {
-                throw new NotFoundException("Could not find user with provided id.");
-            }
+        public async Task DeleteUserByIdAsync(int id)
+        {
+            var user = await _userRepository.GetUserByIdAsync(id) ?? throw new NotFoundException("Could not find user with provided id.");
 
             if (user.Is_Deleted)
             {
                 throw new AlreadySoftDeletedException("User is already deleted.");
             }
 
-            await _userRepository.DeleteUserByUserIdAsync(id);
+            await _userRepository.DeleteUserByIdAsync(id);
         }
 
         public async Task AddUserAsync(AddUserRequest request)
@@ -50,16 +52,11 @@ namespace project_backend.Services
             await _userRepository.AddUserAsync(request);
         }
 
-        public async Task<User> UpdateUserByUserIdAsync(UpdateUserRequest request)
+        public async Task<User> UpdateUserByIdAsync(UpdateUserRequest request)
         {
-            var user = await _userRepository.GetUserByUserIdAsync(request.User_Id);
+            var user = await _userRepository.GetUserByIdAsync(request.User_Id) ?? throw new NotFoundException("Could not find user with provided id.");
 
-            if (user == null)
-            {
-                throw new NotFoundException("Could not find user with provided id.");
-            }
-
-            var updatedUserCount = await _userRepository.UpdateUserByUserIdAsync(request);
+            var updatedUserCount = await _userRepository.UpdateUserByIdAsync(request);
 
             if (updatedUserCount == 0 || user.Is_Deleted)
             {

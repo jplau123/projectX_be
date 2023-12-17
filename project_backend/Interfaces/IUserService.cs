@@ -1,4 +1,5 @@
 ﻿using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
 using project_backend.Model.Entities;
 
 namespace project_backend.Interfaces
@@ -7,14 +8,16 @@ namespace project_backend.Interfaces
     {
         public int AddUserBalance(int user_id, int balance);
 
-        Task<List<User>>? GetUsersAsync();
+        Task<List<User>> GetUsersAsync();
 
-        Task<User> GetUserByUserIdAsync(int id);
+        Task<User> GetUserByIdAsync(int id);
 
-        Task DeleteUserByUserIdAsync(int id);
+        Task<List<GetPurchaseResponse>> GetAllPurchaseHistoryAsync();
+
+        Task DeleteUserByIdAsync(int id);
 
         Task AddUserAsync(AddUserRequest request);
 
-        Task<User> UpdateUserByUserIdAsync(UpdateUserRequest request);
+        Task<User> UpdateUserByIdAsync(UpdateUserRequest request);
     }
 }
