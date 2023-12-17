@@ -14,7 +14,7 @@ namespace project_backend.Repositories
         }
         public IEnumerable<Item> GetItems()
         {
-            return _connection.Query<Item>("SELECT item_id, item_name, price, amount, created_at, created_by, is_deleted FROM items WHERE is_deleted = false");
+            return _connection.Query<Item>("SELECT item_id, item_name, price, quantity, created_at, created_by, is_deleted FROM items WHERE is_deleted = false");
         }
 
         public int GetItemQuantityInStore(string itemName)
@@ -59,6 +59,7 @@ namespace project_backend.Repositories
             };
             _connection.Execute(sql, queryArguments);
         }
+
         public Task<int> AddNewItem(string name, decimal price, int quantity, string? created_by)
         {
             string sql = $"INSERT INTO items (item_name, price, quantity, created_by) VALUES (@name, @price, @quantity, @created_by) returning item_id";
@@ -71,6 +72,7 @@ namespace project_backend.Repositories
             };
             return _connection.ExecuteScalarAsync<int>(sql, queryArguments);
         }
+
         public async Task<bool> UpdateItem(int id, string name, decimal price, int quantity)
         {
             string sql = $"UPDATE items SET item_name = @name, price = @price, quantity = @quantity WHERE item_id = @id";
@@ -83,6 +85,7 @@ namespace project_backend.Repositories
             };
             return (await _connection.ExecuteAsync(sql, queryArguments)) > 0;
         }
+
         public async Task<bool> DeleteItem(int id)
         {
             string sqlSecond = $"UPDATE items SET is_deleted = true WHERE item_id = @id";
@@ -93,6 +96,7 @@ namespace project_backend.Repositories
             var update = await _connection.ExecuteAsync(sqlSecond, queryArgumentsSecond);
             return update > 0;
         }
+
         public async Task<Item> GetItemById(int id)
         {
             string sql = $"SELECT item_id, item_name, price, quantity, created_at, created_by FROM items WHERE item_id = @id AND is_deleted = false";
@@ -101,6 +105,18 @@ namespace project_backend.Repositories
                 id = id
             };
             return await _connection.QuerySingleAsync<Item>(sql, queryArguments);
+        }
+
+        public async Task<bool> CheckIfItemExists(string name)
+        {
+            string sql = $"SELECT COUNT(*) FROM items WHERE item_name = @name AND is_deleted = false";
+            return await _connection.QueryFirstAsync<int>(sql, new {name = name}) > 0;
+        }
+
+        public async Task<bool> CheckIfItemExistsById(int id)
+        {
+            string sql = $"SELECT COUNT(*) FROM items WHERE item_id = @id AND is_deleted = false";
+            return await _connection.QueryFirstAsync<int>(sql, new { id = id }) > 0;
         }
     }
 }

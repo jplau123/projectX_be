@@ -13,6 +13,8 @@ namespace project_backend.Interfaces
         public Task<bool> UpdateItem(int id, string name, decimal price, int quantity);
         public Task<bool> DeleteItem(int id);
         public Task<int> AddNewItem(string name, decimal price, int amount, string? created_by);
+        public Task<bool> CheckIfItemExists(string name);
+        public Task<bool> CheckIfItemExistsById(int id);
 
     }
 }
