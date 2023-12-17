@@ -14,11 +14,11 @@ namespace project_backend.Services
             _userRepository = userRepository;
             _itemRepository = itemRepository;
         }
-        public decimal AddUserBalance(int user_id, decimal balance)
+        public decimal AddUserBalance(int userId, decimal balance)
         {
-            decimal currentBalance = _userRepository.GetUserBalance(user_id);
+            decimal currentBalance = _userRepository.GetUserBalance(userId);
             decimal balanceAfterTopUp = currentBalance + balance;
-            return _userRepository.AddUserBalance(user_id, balanceAfterTopUp);
+            return _userRepository.AddUserBalance(userId, balanceAfterTopUp);
         }
 
         public void PurchaseItem(int userId, string itemName, int quantityToBuy)
