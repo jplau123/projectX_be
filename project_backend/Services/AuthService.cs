@@ -160,9 +160,8 @@ namespace project_backend.Services
 
         public async Task<UserAuth> GetUserAuthDetails(string userName)
         {
-            UserAuth user = await _userAuthRepository.GetUserAuthDetails(userName)
-                ?? throw new Exception($"The user with username '{userName}' does not exist. ");
-            return user;
+            return await _userAuthRepository.GetUserAuthDetails(userName)
+                ?? throw new NotFoundException($"User does not exist. ");
         }
 
         public async Task<UserAuth> GetUserFromToken(string token)
