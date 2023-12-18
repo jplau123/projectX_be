@@ -54,9 +54,9 @@ namespace project_backend.Services
         public async Task<bool> DeleteItem(int id)
         {
             bool itemExists = await _itemRepository.CheckIfItemExistsById(id);
-            if (itemExists)
+            if (!itemExists)
             {
-                throw new ItemAlreadyExistsException("Item already exists");// problema!! 
+                throw new NotFoundException("The item you want to delete does not exists.");
             }
             return await _itemRepository.DeleteItem(id);
         }

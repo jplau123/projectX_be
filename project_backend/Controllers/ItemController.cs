@@ -85,7 +85,7 @@ namespace project_backend.Controllers
             }
             catch
             {
-                throw new FailedToAddException($"There is no item with id {id}");
+                throw new NotFoundException($"There is no item with id {id}");
             }
         }
     }
