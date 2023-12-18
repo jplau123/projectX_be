@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using project_backend.DTOs.RequestDTO;
 using project_backend.DTOs.ResponseDTO;
-using project_backend.Enums;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
@@ -34,7 +32,7 @@ public class AuthController : ControllerBase
 
         return CreatedAtAction(
             controllerName: "User",
-            actionName: nameof(UserController.GetUserById),
+            actionName: nameof(UserController.GetUserByIdAsync),
             routeValues: new { user_id = user.User_Id },
             value: user);
     }
@@ -42,7 +40,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Login(UserAuthRequest request)
-    {        
+    {
         _logger.Log(LogLevel.Information, "Attempting to authenticate... ");
 
         TokenResponse token = await _loginService.Authenticate(request);
