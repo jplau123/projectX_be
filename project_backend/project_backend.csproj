@@ -55,7 +55,9 @@
     <Folder Include="Attributes\" />
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
+    <Folder Include="DTOs\" />
     <Folder Include="DTOs\ResponseDTO\" />
+    <Folder Include="Scripts\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />
     <Folder Include="Scripts\" />

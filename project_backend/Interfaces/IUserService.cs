@@ -1,13 +1,25 @@
-﻿using project_backend.Model.Entities;
+﻿using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
+using project_backend.Model.Entities;
 
 namespace project_backend.Interfaces
 {
     public interface IUserService
     {
-        public decimal AddUserBalance(int userId, decimal balance);
-        public void PurchaseItem(int userId, string itemName, int quantityToBuy);
-        public Task<List<User>>? GetUsersAsync();
-        public Task DeleteUserByUserIdAsync(int id);
-        public Task<User> GetUserById(int user_id);
+        decimal AddUserBalance(int userId, decimal balance);
+
+        void PurchaseItem(int userId, string itemName, int quantityToBuy);
+
+        Task<List<User>> GetUsersAsync();
+
+        Task<User> GetUserByIdAsync(int id);
+
+        Task<List<GetPurchaseResponse>> GetAllPurchaseHistoryAsync();
+
+        Task DeleteUserByIdAsync(int id);
+
+        Task AddUserAsync(AddUserRequest request);
+
+        Task<User> UpdateUserByIdAsync(UpdateUserRequest request);
     }
 }

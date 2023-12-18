@@ -1,4 +1,6 @@
-﻿using project_backend.Exceptions;
+﻿using project_backend.DTOs.RequestDTO;
+using project_backend.DTOs.ResponseDTO;
+using project_backend.Exceptions;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
@@ -8,7 +10,7 @@ namespace project_backend.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IItemRepository _itemRepository;
-        
+
         public UserService(IUserRepository userRepository, IItemRepository itemRepository)
         {
             _userRepository = userRepository;
@@ -26,7 +28,7 @@ namespace project_backend.Services
             decimal userBalance = _userRepository.GetUserBalance(userId);
             int quantityInStore = _itemRepository.GetItemQuantityInStore(itemName);
             decimal totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
-            
+
             decimal unitPrice = totalPrice / quantityToBuy;
             decimal reducedBalance = userBalance - totalPrice;
             int reducedQuantity = quantityInStore - quantityToBuy;
@@ -53,33 +55,54 @@ namespace project_backend.Services
             }
 
             _itemRepository.UpdateItemQuantity(itemName, reducedQuantity);
-
-           
-
-            
         }
 
-        public async Task<List<User>>? GetUsersAsync()
+        public async Task<List<User>> GetUsersAsync()
         {
             var result = await _userRepository.GetUsersAsync();
             return result.ToList();
         }
 
-        public async Task DeleteUserByUserIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(int id)
         {
-            var user = await _userRepository.GetUserByUserIdAsync(id);
+            return await _userRepository.GetUserByIdAsync(id) ?? throw new NotFoundException("User not found.");
+        }
 
-            if (user == null)
-            {
-                throw new NotFoundException("Could not find user with provided id.");
-            }
+        public async Task<List<GetPurchaseResponse>> GetAllPurchaseHistoryAsync()
+        {
+            var purchaseHistory = await _userRepository.GetAllPurchaseHistoryAsync();
+            return purchaseHistory.ToList();
+        }
+
+        public async Task DeleteUserByIdAsync(int id)
+        {
+            var user = await _userRepository.GetUserByIdAsync(id) ?? throw new NotFoundException("Could not find user with provided id.");
 
             if (user.Is_Deleted)
             {
                 throw new AlreadySoftDeletedException("User is already deleted.");
             }
 
-            await _userRepository.DeleteUserByUserIdAsync(id);
+            await _userRepository.DeleteUserByIdAsync(id);
+        }
+
+        public async Task AddUserAsync(AddUserRequest request)
+        {
+            await _userRepository.AddUserAsync(request);
+        }
+
+        public async Task<User> UpdateUserByIdAsync(UpdateUserRequest request)
+        {
+            var user = await _userRepository.GetUserByIdAsync(request.User_Id) ?? throw new NotFoundException("Could not find user with provided id.");
+
+            var updatedUserCount = await _userRepository.UpdateUserByIdAsync(request);
+
+            if (updatedUserCount == 0 || user.Is_Deleted)
+            {
+                throw new NotFoundException("Could not find user with provided id.");
+            }
+
+            return user;
         }
 
         public async Task<User> GetUserById(int user_id)
