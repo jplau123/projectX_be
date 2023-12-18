@@ -26,6 +26,18 @@ namespace project_backend.Middlewares
                 await _next(httpContext);
                 return;
             }
+            catch (ExceededAmountException ex)
+            {
+                statusCode = (int)HttpStatusCode.UnprocessableContent;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
+            catch (ExceededPriceException ex)
+            {
+                statusCode = (int)HttpStatusCode.UnprocessableContent;
+                message = $"{ex.Message}";
+                trace = ex.StackTrace;
+            }
             catch (NotFoundException ex)
             {
                 statusCode = (int)HttpStatusCode.NotFound;

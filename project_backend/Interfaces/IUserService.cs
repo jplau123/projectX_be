@@ -6,7 +6,11 @@ namespace project_backend.Interfaces
 {
     public interface IUserService
     {
-        public int AddUserBalance(int user_id, int balance);
+        decimal AddUserBalance(int userId, decimal balance);
+
+        void PurchaseItem(int userId, string itemName, int quantityToBuy);
+
+        int AddUserBalance(int user_id, int balance);
 
         Task<List<User>> GetUsersAsync();
 

@@ -14,6 +14,14 @@ namespace project_backend.Controllers
             _userService = userService;
         }
 
+
+        [HttpPut]
+        public async Task<IActionResult> PurchaseItem(int userId, string itemName, int quantityToBuy)
+        {
+            _userService.PurchaseItem(userId, itemName, quantityToBuy);
+            return Ok($"{itemName} purchase successful");
+        }
+
         [HttpPut]
         public async Task<IActionResult> AddUserBalance(int user_id, int balance)
         {

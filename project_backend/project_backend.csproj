@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <UserSecretsId>51c6416d-1cd9-4bc2-acf9-1effcd5afcd4</UserSecretsId>
+    <UserSecretsId>152bd9f1-c9e3-47f1-8362-2ba49fd40e98</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,8 +50,8 @@
     <Folder Include="Attributes\" />
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
-    <Folder Include="Scripts\" />
-    <Folder Include="Scripts\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="DTOs\ResponseDTO\" />
     <Folder Include="Scripts\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />

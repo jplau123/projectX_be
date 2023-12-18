@@ -6,7 +6,13 @@ namespace project_backend.Interfaces
 {
     public interface IUserRepository
     {
-        public int AddUserBalance(int user_id, int balance);
+        decimal AddUserBalance(int userId, int balance);
+
+        decimal GetUserBalance(int userId);
+
+        void UpdateUserBalance(int userId, decimal reducedBalance);
+
+        void AppendPurchaseHistory(int userId, string itemName, int quantity, decimal unitPrice);
 
         Task<IEnumerable<User>> GetUsersAsync();
 
