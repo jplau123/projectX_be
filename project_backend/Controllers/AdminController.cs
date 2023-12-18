@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using project_backend.DTOs.RequestDTO;
+using project_backend.Enums;
 using project_backend.Interfaces;
 
 namespace project_backend.Controllers
@@ -10,6 +12,7 @@ namespace project_backend.Controllers
     {
         private readonly IUserService _userService = userService;
 
+        [Authorize(Roles = nameof(Roles.Admin))]
         [HttpGet]
         public async Task<IActionResult> GetUsersAsync()
         {
@@ -17,6 +20,7 @@ namespace project_backend.Controllers
             return Ok(usersList);
         }
 
+        [Authorize(Roles = nameof(Roles.Admin))]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserByUserIdAsync(int id)
         {
@@ -24,6 +28,7 @@ namespace project_backend.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = nameof(Roles.Admin))]
         [HttpPut("{id}")]
         public async Task<IActionResult> DeleteUserByUserIdAsync(int id)
         {
@@ -31,6 +36,7 @@ namespace project_backend.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(Roles.Admin))]
         [HttpPost]
         public async Task<IActionResult> AddUserAsync([FromBody] AddUserRequest request)
         {
@@ -38,6 +44,7 @@ namespace project_backend.Controllers
             return Created();
         }
 
+        [Authorize(Roles = nameof(Roles.Admin))]
         [HttpPut]
         public async Task<IActionResult> UpdateUserByUserIdAsync([FromBody] UpdateUserRequest request)
         {

@@ -85,7 +85,7 @@ namespace project_backend.Services
             if (userId == null || userId == 0)
                 throw new Exception("Oops! Unexpected error occured during the user registration. Please try again. ");
 
-            return await _userRepository.GetUserById((int)userId)
+            return await _userRepository.GetUserByIdAsync((int)userId)
                 ?? throw new Exception("Failed to load the user.");
         }
 

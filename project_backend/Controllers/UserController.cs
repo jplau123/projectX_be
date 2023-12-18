@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using project_backend.Enums;
 using project_backend.Interfaces;
 
 namespace project_backend.Controllers
@@ -14,7 +16,6 @@ namespace project_backend.Controllers
             _userService = userService;
         }
 
-
         [HttpPut]
         public async Task<IActionResult> PurchaseItem(int userId, string itemName, int quantityToBuy)
         {
@@ -28,17 +29,18 @@ namespace project_backend.Controllers
             return Ok("The new balance is $" + _userService.AddUserBalance(user_id, balance));
         }
 
+        [Authorize(Roles = nameof(Roles.Manager))]
         [HttpGet]
         public async Task<IActionResult> GetAllPurchaseHistoryAsync()
         {
             var purchaseHistory = await _userService.GetAllPurchaseHistoryAsync();
             return Ok(purchaseHistory);
         }
-        
+
         [HttpGet]
-        public async Task<IActionResult> GetUserById(int user_id)
+        public async Task<IActionResult> GetUserByIdAsync(int user_id)
         {
-            return Ok(await _userService.GetUserById(user_id));
+            return Ok(await _userService.GetUserByIdAsync(user_id));
         }
 
     }
