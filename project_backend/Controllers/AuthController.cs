@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using project_backend.DTOs.RequestDTO;
 using project_backend.DTOs.ResponseDTO;
+using project_backend.Enums;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
 
