@@ -10,8 +10,6 @@ namespace project_backend.Interfaces
 
         void PurchaseItem(int userId, string itemName, int quantityToBuy);
 
-        int AddUserBalance(int user_id, int balance);
-
         Task<List<User>> GetUsersAsync();
 
         Task<User> GetUserByIdAsync(int id);

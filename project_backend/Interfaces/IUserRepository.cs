@@ -6,7 +6,7 @@ namespace project_backend.Interfaces
 {
     public interface IUserRepository
     {
-        decimal AddUserBalance(int userId, int balance);
+        decimal AddUserBalance(int userId, decimal balance);
 
         decimal GetUserBalance(int userId);
 

@@ -10,7 +10,7 @@ namespace project_backend.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IItemRepository _itemRepository;
-        
+
         public UserService(IUserRepository userRepository, IItemRepository itemRepository)
         {
             _userRepository = userRepository;
@@ -28,7 +28,7 @@ namespace project_backend.Services
             decimal userBalance = _userRepository.GetUserBalance(userId);
             int quantityInStore = _itemRepository.GetItemQuantityInStore(itemName);
             decimal totalPrice = _itemRepository.GetTotalItemPrice(itemName, quantityToBuy);
-            
+
             decimal unitPrice = totalPrice / quantityToBuy;
             decimal reducedBalance = userBalance - totalPrice;
             int reducedQuantity = quantityInStore - quantityToBuy;
@@ -55,10 +55,6 @@ namespace project_backend.Services
             }
 
             _itemRepository.UpdateItemQuantity(itemName, reducedQuantity);
-
-           
-
-            
         }
 
         public async Task<List<User>> GetUsersAsync()

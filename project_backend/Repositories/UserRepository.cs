@@ -18,7 +18,6 @@ namespace project_backend.Repositories
 
         public decimal AddUserBalance(int userId, decimal balance)
         {
-
             string sql = $"UPDATE users SET balance = @Balance WHERE user_id = @User_Id RETURNING balance";
             var queryArguments = new
             {
@@ -69,7 +68,7 @@ namespace project_backend.Repositories
 
             return await _connection.QuerySingleAsync<User>(query, queryArguments);
         }
-        
+
         public void AppendPurchaseHistory(int userId, string itemName, int quantityPurchased, decimal unitPrice)
         {
             string sql = "INSERT INTO purchase_history (user_id, unit_price, quantity, item_id) VALUES (@User_Id, @Unit_Price, @Quantity, (SELECT item_id FROM items WHERE item_name = @Item_Name))";
