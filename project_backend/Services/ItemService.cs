@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using project_backend.Exceptions;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
+using System.Xml.Linq;
 
 namespace project_backend.Services
 {
@@ -21,15 +23,24 @@ namespace project_backend.Services
             }
             return itemsList;
         }
+
         public Task<Item> GetItemById(int id)
         {
             return _itemRepository.GetItemById(id);
         }
+
         public async Task<Item> AddNewItem(string name, decimal price, int amount, string? created_by)
         {
+            bool itemExists = await _itemRepository.CheckIfItemExists(name);
+            if (itemExists)
+            {
+                throw new ItemAlreadyExistsException("Item already exists");
+            }
+
             var id = await _itemRepository.AddNewItem(name, price, amount, created_by);
             return await _itemRepository.GetItemById(id);
         }
+
         public async Task<Item> UpdateItem(int id, string name, decimal price, int quantity)
         {
             var result = await _itemRepository.UpdateItem(id, name, price, quantity);
@@ -39,9 +50,25 @@ namespace project_backend.Services
             }
             throw new InvalidOperationException();
         }
-        public Task<bool> DeleteItem(int id)
+
+        public async Task<bool> DeleteItem(int id)
         {
-            return _itemRepository.DeleteItem(id);
+            bool itemExists = await _itemRepository.CheckIfItemExistsById(id);
+            if (!itemExists)
+            {
+                throw new NotFoundException("The item you want to delete does not exists.");
+            }
+            return await _itemRepository.DeleteItem(id);
+        }
+
+        public Task<bool> CheckIfItemExists(string name)
+        {
+           return _itemRepository.CheckIfItemExists(name);
+        }
+
+        public Task<bool> CheckIfItemExistsById(int id)
+        {
+            return _itemRepository.CheckIfItemExistsById(id);
         }
         
     }
