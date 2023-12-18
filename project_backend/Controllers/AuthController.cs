@@ -30,11 +30,7 @@ public class AuthController : ControllerBase
 
         _logger.Log(LogLevel.Information, "User '{username}' successfuly registered.", request.UserName);
 
-        return CreatedAtAction(
-            controllerName: "User",
-            actionName: nameof(UserController.GetUserByIdAsync),
-            routeValues: new { user_id = user.User_Id },
-            value: user);
+        return Created("https://localhost:7025/User/GetUserById", user);
     }
 
     [AllowAnonymous]
