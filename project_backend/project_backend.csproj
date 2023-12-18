@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <UserSecretsId>152bd9f1-c9e3-47f1-8362-2ba49fd40e98</UserSecretsId>
+    <UserSecretsId>ecc4dc52-0b96-4778-ad00-c180c3e91079</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +37,7 @@
     <PackageReference Include="Dapper" Version="2.1.24" />
     <PackageReference Include="dbup-postgresql" Version="5.0.37" />
     <PackageReference Include="JWT" Version="10.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql" Version="8.0.1" />
     <PackageReference Include="Serilog" Version="3.1.1" />
@@ -47,12 +49,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Middlewares\Responses\" />
+    <Folder Include="Middlewares\Requests\" />
     <Folder Include="Attributes\" />
     <Folder Include="Model\Entities\" />
     <Folder Include="Services\" />
     <Folder Include="DTOs\ResponseDTO\" />
     <Folder Include="Middlewares\Responses\" />
     <Folder Include="Middlewares\Requests\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>

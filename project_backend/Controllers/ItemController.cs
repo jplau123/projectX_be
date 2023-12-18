@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using project_backend.DTOs.RequestDTO;
 using project_backend.Interfaces;
 using project_backend.Model.Entities;
@@ -10,6 +11,7 @@ namespace project_backend.Controllers
     public class ItemController : ControllerBase
     {
         private readonly IItemService _itemService;
+
         public ItemController(IItemService itemService)
         {
             _itemService = itemService;

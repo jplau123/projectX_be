@@ -92,5 +92,14 @@ namespace project_backend.Repositories
 
             return await _connection.QuerySingleAsync<User>(query, queryArguments);
         }
+
+        public async Task<User?> GetUserById(int user_id)
+        {
+            string sql = $"SELECT user_id, user_name, balance, role, active, created_at, created_by, modified_at, modified_by FROM users WHERE user_id = @userId";
+
+            User? user = await _connection.QuerySingleOrDefaultAsync<User>(sql, new { userId = user_id });
+
+            return user;
+        }
     }
 }

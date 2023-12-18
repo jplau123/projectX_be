@@ -8,5 +8,6 @@ namespace project_backend.Interfaces
         public void PurchaseItem(int userId, string itemName, int quantityToBuy);
         public Task<List<User>>? GetUsersAsync();
         public Task DeleteUserByUserIdAsync(int id);
+        public Task<User> GetUserById(int user_id);
     }
 }

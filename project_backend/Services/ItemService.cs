@@ -11,6 +11,7 @@ namespace project_backend.Services
         {
             _itemRepository = itemRepository;
         }
+
         public List<Item> GetItems()
         {
             var itemsList = _itemRepository.GetItems().ToList();

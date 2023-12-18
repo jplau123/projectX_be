@@ -30,5 +30,12 @@ namespace project_backend.Controllers
             _userService.PurchaseItem(userId, itemName, quantityToBuy);
             return Ok($"{itemName} purchase successful");
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetUserById(int user_id)
+        {
+            return Ok(await _userService.GetUserById(user_id));
+        }
+
     }
 }

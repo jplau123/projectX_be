@@ -81,5 +81,10 @@ namespace project_backend.Services
 
             await _userRepository.DeleteUserByUserIdAsync(id);
         }
+
+        public async Task<User> GetUserById(int user_id)
+        {
+            return await _userRepository.GetUserById(user_id) ?? throw new NotFoundException($"User with id '{user_id}' could not be found.");
+        }
     }
 }

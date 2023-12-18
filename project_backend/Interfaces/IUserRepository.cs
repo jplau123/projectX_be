@@ -11,5 +11,6 @@ namespace project_backend.Interfaces
         public Task<IEnumerable<User>> GetUsersAsync();
         public Task<User> GetUserByUserIdAsync(int id);
         public Task<int> DeleteUserByUserIdAsync(int id);
+        public Task<User?> GetUserById(int user_id);
     }
 }
