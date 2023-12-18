@@ -66,9 +66,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<IAdminService, AdminService>();
-builder.Services.AddTransient<IAdminRepository, AdminRepository>();
-
 EnsureDatabase.For.PostgresqlDatabase(connectionString);
 
 var upgrader =
