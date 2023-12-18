@@ -1,77 +1,95 @@
-﻿using project_backend.Exceptions;
+﻿using Microsoft.IdentityModel.Tokens;
+using project_backend.Exceptions;
 using project_backend.Model;
 using System.Net;
 
 namespace project_backend.Middlewares
 {
-    public class ErrorMiddleware
+    public class ErrorMiddleware : IMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly ILogger<ErrorMiddleware> _logger;
 
-        public ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)
+        public ErrorMiddleware(ILogger<ErrorMiddleware> logger)
         {
-            _next = next;
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
         {
-            int statusCode;
-            string message;
-            string? trace;
-
             try
             {
-                await _next(httpContext);
+                await next(httpContext);
                 return;
-            }
-            catch (ExceededAmountException ex)
-            {
-                statusCode = (int)HttpStatusCode.UnprocessableContent;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
-            catch (ExceededPriceException ex)
-            {
-                statusCode = (int)HttpStatusCode.UnprocessableContent;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
-            catch (NotFoundException ex)
-            {
-                statusCode = (int)HttpStatusCode.NotFound;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
-            }
-            catch (AlreadySoftDeletedException ex)
-            {
-                statusCode = (int)HttpStatusCode.Gone;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
             }
             catch (Exception ex)
             {
-                statusCode = (int)HttpStatusCode.InternalServerError;
-                message = $"{ex.Message}";
-                trace = ex.StackTrace;
+                ErrorModel error = await GetExceptionResponseAsync(ex);
+
+                await HandleException(httpContext, error);
+
+                return;
+            }
+        }
+
+        private Task<ErrorModel> GetExceptionResponseAsync(Exception exception)
+        {
+            int statusCode;
+
+            switch (exception)
+            {
+                case AuthenticationException:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case SecurityTokenException:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case NotFoundException:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case BadRequestException:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case ExceededAmountException:
+                    statusCode = (int)HttpStatusCode.UnprocessableContent;
+                    break;
+                case ExceededPriceException:
+                    statusCode = (int)HttpStatusCode.UnprocessableContent;
+                    break;
+                case AlreadySoftDeletedException:
+                    statusCode = (int)HttpStatusCode.Gone;
+                    break;
+                default:
+                    statusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
             }
 
-            _logger.Log(LogLevel.Error, $"----------------------------------------");
-            _logger.Log(LogLevel.Error, $"Error: {message}");
-            _logger.Log(LogLevel.Error, $"Trace: {trace}");
+            string? message = exception.Message;
+            string? trace = exception.StackTrace;
 
-            httpContext.Response.StatusCode = statusCode;
-
-            var response = new ErrorViewModel
+            return Task.FromResult(new ErrorModel()
             {
                 Status = statusCode,
-                Error = message
+                Message = message,
+                Trace = trace
+            });
+        }
+
+        private async Task HandleException(HttpContext httpContext, ErrorModel error)
+        {
+            _logger.Log(LogLevel.Error, $"----------------------------------------");
+            _logger.Log(LogLevel.Error, "Status Code: {status}", error.Status);
+            _logger.Log(LogLevel.Error, "Error: {message}", error.Message);
+            _logger.Log(LogLevel.Error, "Trace: {trace}", error.Trace);
+
+            httpContext.Response.StatusCode = error.Status;
+
+            var errorView = new ErrorViewModel
+            {
+                Status = error.Status,
+                Message = error.Message
             };
 
-            await httpContext.Response.WriteAsJsonAsync(response);
-
-            return;
+            await httpContext.Response.WriteAsJsonAsync(errorView);
         }
     }
 }
